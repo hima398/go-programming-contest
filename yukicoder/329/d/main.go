@@ -13,12 +13,39 @@ import (
 const Mod = 1000000007
 
 var sc = bufio.NewScanner(os.Stdin)
+var out = bufio.NewWriter(os.Stdout)
+
+func solve(n int, a []int) int {
+	m := make(map[int]int)
+	for _, v := range a {
+		m[v]++
+	}
+	pre := make(map[int]int)
+	for i := 0; i < n-1; i++ {
+		for j := i + 1; j < n; j++ {
+			pre[i+j]++
+		}
+	}
+	ans := n * (n - 1) / 2
+	for k, v := range pre {
+		if _, found := m[k]; found {
+			//kの取り方と、m[k]の取り方
+			ans += (v * (v - 1) / 2) * (m[k] * (m[k] - 1) / 2)
+		}
+	}
+	return ans
+}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	a := nextIntSlice(n)
+
+	ans := solve(n, a)
+	PrintInt(ans)
 }
 
 func nextInt() int {
@@ -44,6 +71,37 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
+}
+
+func PrintInt(x int) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintFloat64(x float64) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintString(x string) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintHorizonaly(x []int) {
+	defer out.Flush()
+	fmt.Fprintf(out, "%d", x[0])
+	for i := 1; i < len(x); i++ {
+		fmt.Fprintf(out, " %d", x[i])
+	}
+	fmt.Fprintln(out)
+}
+
+func PrintVertically(x []int) {
+	defer out.Flush()
+	for _, v := range x {
+		fmt.Fprintln(out, v)
+	}
 }
 
 func Abs(x int) int {
