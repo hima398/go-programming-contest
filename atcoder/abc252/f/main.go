@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"errors"
 	"fmt"
 	"math"
@@ -10,16 +11,66 @@ import (
 	"strconv"
 )
 
-const Mod = 1000000007
-
 var sc = bufio.NewScanner(os.Stdin)
-var out = bufio.NewWriter(os.Stdout)
+
+type PriorityQueue []int
+
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i] < pq[j]
+}
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(item interface{}) {
+	*pq = append(*pq, item.(int))
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	es := *pq // EdgeのSlice
+	n := len(es)
+	item := es[n-1]
+	*pq = es[0 : n-1]
+	return item
+}
+
+func solve(n, l int, a []int) int {
+	q := &PriorityQueue{}
+	heap.Init(q)
+	s := 0
+	for _, ai := range a {
+		s += ai
+		heap.Push(q, ai)
+	}
+	if l > s {
+		heap.Push(q, l-s)
+	}
+	var ans int
+	for q.Len() >= 2 {
+		b1 := heap.Pop(q).(int)
+		b2 := heap.Pop(q).(int)
+		ans += b1 + b2
+		heap.Push(q, b1+b2)
+	}
+	//ans += heap.Pop(q).(int)
+	//if s != l {
+	//	ans += l
+	//}
+	return ans
+}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, l := nextInt(), nextInt()
+	a := nextIntSlice(n)
+	ans := solve(n, l, a)
+	fmt.Println(ans)
 }
 
 func nextInt() int {
@@ -45,37 +96,6 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
-}
-
-func PrintInt(x int) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintFloat64(x float64) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintString(x string) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintHorizonaly(x []int) {
-	defer out.Flush()
-	fmt.Fprintf(out, "%d", x[0])
-	for i := 1; i < len(x); i++ {
-		fmt.Fprintf(out, " %d", x[i])
-	}
-	fmt.Fprintln(out)
-}
-
-func PrintVertically(x []int) {
-	defer out.Flush()
-	for _, v := range x {
-		fmt.Fprintln(out, v)
-	}
 }
 
 func Abs(x int) int {

@@ -15,11 +15,68 @@ const Mod = 1000000007
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func ComputeDist2(x1, y1, x2, y2 int) int {
+	xx := x2 - x1
+	yy := y2 - y1
+	return xx*xx + yy*yy
+}
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, k := nextInt(), nextInt()
+	a := nextIntSlice(k)
+	var x, y []int
+	for i := 0; i < n; i++ {
+		x = append(x, nextInt())
+		y = append(y, nextInt())
+	}
+
+	//明かりを持っている人
+	m := make(map[int]struct{})
+	for _, v := range a {
+		m[v-1] = struct{}{}
+	}
+	m2 := make(map[int]int)
+	for i := 0; i < n; i++ {
+		if _, hasLight := m[i]; hasLight {
+			continue
+		}
+		m2[i] = 1 << 60
+	}
+	//明かりを持っていない人
+	for key := range m2 {
+		dist := 1 << 60
+		for key2 := range m {
+			dist = Min(dist, ComputeDist2(x[key], y[key], x[key2], y[key2]))
+		}
+		m2[key] = dist
+	}
+	ans := 0
+	for key := range m2 {
+		ans = Max(ans, m2[key])
+	}
+	fmt.Println(math.Sqrt(float64(ans)))
+
+	/**
+	for i := 0; i < k; i++ {
+		dist := 0
+		idx := a[i] - 1
+		for j := 0; j < n; j++ {
+			if idx == j {
+				continue
+			}
+			if _, hasLight := m[j]; hasLight {
+				continue
+			}
+			dist = Max(dist, ComputeDist2(x[idx], y[idx], x[j], y[j]))
+		}
+		ans = Min(ans, dist)
+	}
+	*/
+	//fmt.Println(ans)
+	//fmt.Println(math.Sqrt(float64(ans)))
 }
 
 func nextInt() int {

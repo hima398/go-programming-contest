@@ -15,11 +15,36 @@ const Mod = 1000000007
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solve(n, q int, a, x []int) (ans []int) {
+	sort.Ints(a)
+	s := make([]int, n+2)
+	for i := 1; i <= n; i++ {
+		s[i] = s[i-1] + a[i-1]
+	}
+	s[n+1] = s[n]
+	for i := 0; i < q; i++ {
+		idx := sort.Search(n, func(j int) bool {
+			return a[j] > x[i]
+		})
+		//fmt.Println(idx)
+		sl := idx*x[i] - s[idx]
+		sr := s[n] - s[idx] - (n-idx)*x[i]
+		//fmt.Println(sl, sr)
+		ans = append(ans, sl+sr)
+	}
+	return ans
+}
+
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, q := nextInt(), nextInt()
+	a := nextIntSlice(n)
+	x := nextIntSlice(q)
+	ans := solve(n, q, a, x)
+	PrintVertically(ans)
 }
 
 func nextInt() int {

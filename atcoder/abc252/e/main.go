@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"errors"
 	"fmt"
 	"math"
@@ -13,13 +14,110 @@ import (
 const Mod = 1000000007
 
 var sc = bufio.NewScanner(os.Stdin)
-var out = bufio.NewWriter(os.Stdout)
+
+type Edge struct {
+	i, s, t, c int
+}
+
+type PriorityQueue []Edge
+
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].c < pq[j].c
+}
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(item interface{}) {
+	*pq = append(*pq, item.(Edge))
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	es := *pq // EdgeのSlice
+	n := len(es)
+	item := es[n-1]
+	*pq = es[0 : n-1]
+	return item
+}
+
+func solve(n, m int, a, b, c []int) (ans []int) {
+	const INF = 1 << 60
+	//0-indexed
+	for i := 0; i < m; i++ {
+		a[i]--
+		b[i]--
+	}
+	e := make([][]Edge, n)
+	for i := 0; i < m; i++ {
+		e[a[i]] = append(e[a[i]], Edge{i, a[i], b[i], c[i]})
+		e[b[i]] = append(e[b[i]], Edge{i, b[i], a[i], c[i]})
+	}
+	ds := make([]int, n)
+	for i := 0; i < n; i++ {
+		ds[i] = INF
+	}
+	ds[0] = 0
+	//var q []Edge
+	q := &PriorityQueue{}
+	q2 := &PriorityQueue{}
+	heap.Init(q)
+	//q = append(q, Edge{-1, 0, 0})
+	heap.Push(q, Edge{-1, -1, 0, 0})
+
+	uf := NewUnionFind(n)
+	for q.Len() > 0 && uf.Size(0) < n {
+		edge := heap.Pop(q).(Edge)
+		if edge.s >= 0 && uf.ExistSameUnion(edge.s, edge.t) {
+			continue
+		}
+		if edge.s >= 0 {
+			ds[edge.t] = edge.c
+			uf.Unite(edge.s, edge.t)
+			ans = append(ans, edge.i+1)
+		}
+
+		//q = q[1:]
+		//d[edge.t] = edge.c
+		for _, next := range e[edge.t] {
+			d := edge.c + next.c
+			//if ds[next.t] == INF {
+			//	ans = append(ans, next.i+1)
+			//}
+			if ds[next.t] > d {
+				ds[next.t] = d
+				heap.Push(q, Edge{next.i, next.s, next.t, d})
+				heap.Push(q2, Edge{next.i, next.s, next.t, d})
+			}
+		}
+	}
+
+	return ans
+}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m := nextInt(), nextInt()
+	var a, b, c []int
+	for i := 0; i < m; i++ {
+		a = append(a, nextInt())
+		b = append(b, nextInt())
+		c = append(c, nextInt())
+	}
+	ans := solve(n, m, a, b, c)
+
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	fmt.Fprintf(out, "%d", ans[0])
+	for i := 1; i < len(ans); i++ {
+		fmt.Fprintf(out, " %d", ans[i])
+	}
+	fmt.Fprintln(out)
 }
 
 func nextInt() int {
@@ -45,37 +143,6 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
-}
-
-func PrintInt(x int) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintFloat64(x float64) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintString(x string) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintHorizonaly(x []int) {
-	defer out.Flush()
-	fmt.Fprintf(out, "%d", x[0])
-	for i := 1; i < len(x); i++ {
-		fmt.Fprintf(out, " %d", x[i])
-	}
-	fmt.Fprintln(out)
-}
-
-func PrintVertically(x []int) {
-	defer out.Flush()
-	for _, v := range x {
-		fmt.Fprintln(out, v)
-	}
 }
 
 func Abs(x int) int {

@@ -10,16 +10,80 @@ import (
 	"strconv"
 )
 
-const Mod = 1000000007
-
 var sc = bufio.NewScanner(os.Stdin)
-var out = bufio.NewWriter(os.Stdout)
+
+//O(n)
+func f(t string) int {
+	m := make(map[string]struct{})
+
+	bs := make([]byte, len(t))
+	copy(bs, t)
+	for i := 0; i < len(t); i++ {
+		m[string(bs)] = struct{}{}
+		bs = append(bs[1:], bs[0])
+	}
+	return len(m)
+}
+
+func divisor(x int) []int {
+	m := make(map[int]struct{})
+	for i := 1; i*i <= x; i++ {
+		if x%i == 0 {
+			m[i] = struct{}{}
+			m[x/i] = struct{}{}
+		}
+	}
+	var res []int
+	for k := range m {
+		res = append(res, k)
+	}
+	sort.Ints(res)
+	return res
+}
+
+func solve(n, k int, s string) int {
+	ds := divisor(n)
+	//fmt.Println(ds)
+
+	ans := n
+	for _, v := range ds {
+		m := make([]map[byte]int, v)
+		for i := 0; i < v; i++ {
+			m[i] = make(map[byte]int)
+		}
+		for i := 0; i < n; i++ {
+			m[i%v][s[i]]++
+		}
+
+		diff := 0
+		for _, v := range m {
+			sum := 0
+			mx := 0
+			for _, cnt := range v {
+				sum += cnt
+				mx = Max(mx, cnt)
+			}
+			diff += sum - mx
+		}
+
+		//fmt.Println("diff = ", diff)
+		if diff <= k {
+			ans = Min(ans, v)
+		}
+	}
+	return ans
+}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, k := nextInt(), nextInt()
+	s := nextString()
+
+	ans := solve(n, k, s)
+	fmt.Println(ans)
 }
 
 func nextInt() int {
@@ -45,37 +109,6 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
-}
-
-func PrintInt(x int) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintFloat64(x float64) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintString(x string) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintHorizonaly(x []int) {
-	defer out.Flush()
-	fmt.Fprintf(out, "%d", x[0])
-	for i := 1; i < len(x); i++ {
-		fmt.Fprintf(out, " %d", x[i])
-	}
-	fmt.Fprintln(out)
-}
-
-func PrintVertically(x []int) {
-	defer out.Flush()
-	for _, v := range x {
-		fmt.Fprintln(out, v)
-	}
 }
 
 func Abs(x int) int {

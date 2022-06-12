@@ -5,21 +5,120 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/rand"
 	"os"
 	"sort"
 	"strconv"
+	"time"
 )
 
-const Mod = 1000000007
-
 var sc = bufio.NewScanner(os.Stdin)
-var out = bufio.NewWriter(os.Stdout)
+
+func solveHonestly(n int, p []int) int {
+	var pp []int
+	m0 := make(map[int]struct{})
+	rand.Seed(time.Now().UnixNano())
+	for len(m0) < 5 {
+		v := rand.Intn(5) + 1
+		fmt.Println(len(m0), v)
+		if _, found := m0[v]; !found {
+			m0[v] = struct{}{}
+			pp = append(pp, v)
+		}
+	}
+	fmt.Println(pp)
+
+	eval := func(s string) bool {
+		for i := 0; i < len(s); i++ {
+			v := int(s[i] - '0')
+			if v != i+1 {
+				return false
+			}
+		}
+		return true
+	}
+	rotate := func(s string) string {
+		var res []byte
+		for i := 1; i < len(s); i++ {
+			res = append(res, s[i])
+		}
+		res = append(res, s[0])
+		return string(res)
+	}
+	reverse := func(s string) string {
+		var res string
+		for i := len(s) - 1; i >= 0; i-- {
+			res += string(s[i])
+		}
+		return res
+	}
+	var s string
+	for _, ppi := range pp {
+		s += string(byte(ppi) + '0')
+	}
+
+	m := make(map[string]struct{})
+	type item struct {
+		d int
+		s string
+	}
+	var q []item
+	q = append(q, item{0, s})
+	m[s] = struct{}{}
+	for len(q) > 0 {
+		p := q[0]
+		q = q[1:]
+		if eval(p.s) {
+			return p.d
+		}
+		s1 := rotate(p.s)
+		if _, found := m[s1]; !found {
+			q = append(q, item{p.d + 1, s1})
+			m[s1] = struct{}{}
+		}
+		s2 := reverse(p.s)
+		if _, found := m[s2]; !found {
+			q = append(q, item{p.d + 1, s2})
+			m[s2] = struct{}{}
+		}
+	}
+	return -1
+}
+
+func solve(n int, p []int) int {
+	var rp []int
+	for i := n - 1; i >= 0; i-- {
+		rp = append(rp, p[i])
+	}
+	d1 := 0
+	if p[n-1] == 1 {
+		d1 = 1
+	} else {
+		for p[0] != 1 {
+			p = append(p[1:], p[0])
+			d1++
+		}
+	}
+	d2 := 1
+	for rp[0] != 1 {
+		rp = append(rp[1:], rp[0])
+		d2++
+	}
+	ans := Min(d1, d2)
+	return ans
+}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	p := nextIntSlice(n)
+
+	//ans := solveHonestly(n, p)
+	ans := solve(n, p)
+	fmt.Println(ans)
 }
 
 func nextInt() int {
@@ -45,37 +144,6 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
-}
-
-func PrintInt(x int) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintFloat64(x float64) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintString(x string) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintHorizonaly(x []int) {
-	defer out.Flush()
-	fmt.Fprintf(out, "%d", x[0])
-	for i := 1; i < len(x); i++ {
-		fmt.Fprintf(out, " %d", x[i])
-	}
-	fmt.Fprintln(out)
-}
-
-func PrintVertically(x []int) {
-	defer out.Flush()
-	for _, v := range x {
-		fmt.Fprintln(out, v)
-	}
 }
 
 func Abs(x int) int {

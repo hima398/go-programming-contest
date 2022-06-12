@@ -10,16 +10,60 @@ import (
 	"strconv"
 )
 
-const Mod = 1000000007
-
 var sc = bufio.NewScanner(os.Stdin)
-var out = bufio.NewWriter(os.Stdout)
+
+func solve(n, m, k int) int {
+	const p = 998244353
+
+	dp := make([][]int, n+1)
+	for i := 0; i <= n; i++ {
+		dp[i] = make([]int, m+1)
+	}
+	for j := 1; j <= m; j++ {
+		dp[1][j] = 1
+	}
+	for i := 2; i <= n; i++ {
+		s := make([]int, m+1)
+		for j := 1; j <= m; j++ {
+			s[j] += s[j-1] + dp[i-1][j]
+		}
+		////fmt.Println(s)
+		for j := 1; j <= m; j++ {
+			if k == 0 {
+				// k==0 の時、2中にたされるの注意
+				dp[i][j] = s[m]
+				dp[i][j] %= p
+			} else {
+				l, r := j-k, j+k
+				//fmt.Println(j, l, r)
+				if 1 <= l {
+					dp[i][j] = s[l]
+					dp[i][j] %= p
+				}
+				if r <= m {
+					dp[i][j] += s[m] - s[r-1]
+					dp[i][j] %= p
+				}
+			}
+		}
+	}
+	///fmt.Println(dp[n])
+	ans := 0
+	for j := 1; j <= m; j++ {
+		ans += dp[n][j]
+		ans %= p
+	}
+	return ans
+}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m, k := nextInt(), nextInt(), nextInt()
+	ans := solve(n, m, k)
+	fmt.Println(ans)
 }
 
 func nextInt() int {
@@ -45,37 +89,6 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
-}
-
-func PrintInt(x int) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintFloat64(x float64) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintString(x string) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintHorizonaly(x []int) {
-	defer out.Flush()
-	fmt.Fprintf(out, "%d", x[0])
-	for i := 1; i < len(x); i++ {
-		fmt.Fprintf(out, " %d", x[i])
-	}
-	fmt.Fprintln(out)
-}
-
-func PrintVertically(x []int) {
-	defer out.Flush()
-	for _, v := range x {
-		fmt.Fprintln(out, v)
-	}
 }
 
 func Abs(x int) int {

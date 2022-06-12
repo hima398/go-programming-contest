@@ -20,6 +20,12 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	r, c := nextInt(), nextInt()
+	a := make([][]int, 2)
+	for i := 0; i < 2; i++ {
+		a[i] = nextIntSlice(2)
+	}
+	fmt.Println(a[r-1][c-1])
 }
 
 func nextInt() int {

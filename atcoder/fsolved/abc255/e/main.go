@@ -10,137 +10,33 @@ import (
 	"strconv"
 )
 
-const Mod = 1000000007
-
 var sc = bufio.NewScanner(os.Stdin)
+var out = bufio.NewWriter(os.Stdout)
 
-func solveHonestly(n, q int, a, b, x, y []int) []string {
-	var ans []string
-	for k := 0; k < q; k++ {
-		mx, my := make(map[int]struct{}), make(map[int]struct{})
-		for i := 0; i < x[k]; i++ {
-			mx[a[i]] = struct{}{}
-		}
-		for i := 0; i < y[k]; i++ {
-			my[b[i]] = struct{}{}
-		}
-		ok := true
-		for key := range mx {
-			_, has := my[key]
-			ok = ok && has
-		}
-		for key := range my {
-			_, has := mx[key]
-			ok = ok && has
-		}
-		if ok {
-			ans = append(ans, "Yes")
-		} else {
-			ans = append(ans, "No")
-		}
+func solve(n, m int, s, x []int) int {
+	ml := make(map[int]struct{})
+	for _, xi := range x {
+		ml[xi] = struct{}{}
 	}
-	return ans
-}
-
-func solve(n, q int, a, b, x, y []int) []string {
-	ans := make([]string, q)
-
-	type query struct {
-		i, x, y int
+	b := make([]int, n)
+	for i := 1; i < n; i++ {
+		b[i] = s[i-1] - b[i-1]
 	}
-	var qs []query
-	for k := 0; k < q; k++ {
-		qs = append(qs, query{k, x[k], y[k]})
-	}
-	sort.Slice(qs, func(i, j int) bool {
-		if qs[i].x == qs[j].x {
-			return qs[i].y < qs[j].y
-		}
-		return qs[i].x < qs[j].x
-	})
-	var xi, yi int
-	mx1, mx2 := make(map[int]int), make(map[int]int)
-	my1, my2 := make(map[int]int), make(map[int]int)
-	for _, v := range qs {
-		i := xi
-		for ; i < v.x; i++ {
-			mx2[a[i]]++
-			if _, found := my2[a[i]]; found {
-				my2[a[i]]--
-				if my2[a[i]] == 0 {
-					delete(my2, a[i])
-				}
-			}
-		}
-		xi = i
-		i = yi
-		for ; i < Min(xi, v.y); i++ {
-			if _, found := mx2[b[i]]; found {
-				mx1[b[i]]++
-				mx2[b[i]]--
-				if mx2[b[i]] == 0 {
-					delete(mx2, b[i])
-				}
-			}
-		}
-		yi = i
-		if len(mx2) == 0 && len(my2) == 0 {
-			ans[v.i] = "Yes"
-		} else {
-			ans[v.i] = "No"
-		}
-	}
-
-	sort.Slice(qs, func(i, j int) bool {
-		if qs[i].y == qs[j].y {
-			return qs[i].x < qs[j].x
-		}
-		return qs[i].y < qs[j].y
-	})
-	xi, yi = 0, 0
-	mx1, mx2 = make(map[int]int), make(map[int]int)
-	my1, my2 = make(map[int]int), make(map[int]int)
-	for _, v := range qs {
-		i := yi
-		for ; i < v.y; i++ {
-			if _, found := mx2[b[i]]; found {
-				mx2[b[i]]--
-				if mx2[b[i]] == 0 {
-					delete(mx2, b[i])
-				}
-				my1[b[i]]++
+	c := make(map[int]int)
+	for j := 0; j < m; j++ {
+		for i := 0; i < n; i++ {
+			diff := x[j] - b[i]
+			if i%2 == 0 {
+				c[diff]++
 			} else {
-				my2[b[i]]++
+				c[-diff]++
 			}
-		}
-		yi = i
-		i = xi
-		for {
-			if _, found := my2[a[i]]; found {
-				my1[a[i]]++
-				my2[a[i]]--
-				if my2[a[i]] == 0 {
-					delete(my2, a[i])
-				}
-			} else {
-				mx2[a[i]]++
-			}
-			i++
-			fmt.Println(i, v.x, yi)
-			if i >= Min(v.x, yi) {
-				break
-			}
-		}
-		xi = i
-		if len(ans[v.i]) > 0 {
-			continue
-		} else if len(mx2) == 0 && len(my2) == 0 {
-			ans[v.i] = "Yes"
-		} else {
-			ans[v.i] = "No"
 		}
 	}
-
+	var ans int
+	for _, v := range c {
+		ans = Max(ans, v)
+	}
 	return ans
 }
 
@@ -149,22 +45,12 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
-	n := nextInt()
-	a := nextIntSlice(n)
-	b := nextIntSlice(n)
-	q := nextInt()
-	var x, y []int
-	for i := 0; i < q; i++ {
-		x = append(x, nextInt())
-		y = append(y, nextInt())
-	}
-	//ans := solveHonestly(n, q, a, b, x, y)
-	ans := solve(n, q, a, b, x, y)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-	for _, v := range ans {
-		fmt.Fprintln(out, v)
-	}
+	n, m := nextInt(), nextInt()
+	s := nextIntSlice(n - 1)
+	x := nextIntSlice(m)
+
+	ans := solve(n, m, s, x)
+	PrintInt(ans)
 }
 
 func nextInt() int {
@@ -190,6 +76,37 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
+}
+
+func PrintInt(x int) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintFloat64(x float64) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintString(x string) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintHorizonaly(x []int) {
+	defer out.Flush()
+	fmt.Fprintf(out, "%d", x[0])
+	for i := 1; i < len(x); i++ {
+		fmt.Fprintf(out, " %d", x[i])
+	}
+	fmt.Fprintln(out)
+}
+
+func PrintVertically(x []int) {
+	defer out.Flush()
+	for _, v := range x {
+		fmt.Fprintln(out, v)
+	}
 }
 
 func Abs(x int) int {
