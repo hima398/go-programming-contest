@@ -10,34 +10,25 @@ import (
 	"strconv"
 )
 
+const Mod = 1000000007
+
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
-
-func solveHonestly(n int, a, b []int) int {
-	var ans int
-	for i := 0; i < n-1; i++ {
-		for j := i + 1; j < n; j++ {
-			if a[i]+Max(b[i], b[j]) < a[j]+Min(b[i], b[j]) {
-				ans++
-			} else {
-				break
-			}
-		}
-	}
-	return ans
-}
 
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
-	n := nextInt()
-	a := nextIntSlice(n)
-	b := nextIntSlice(n)
-
-	ans := solveHonestly(n, a, b)
-	PrintInt(ans)
+	n, x := nextInt(), nextInt()
+	var s string
+	for i := 0; i < 26; i++ {
+		for j := 0; j < n; j++ {
+			s += string(i + 'A')
+		}
+	}
+	ans := s[x-1]
+	fmt.Println(string(ans))
 }
 
 func nextInt() int {
@@ -54,9 +45,46 @@ func nextIntSlice(n int) []int {
 	return s
 }
 
+func nextFloat64() float64 {
+	sc.Scan()
+	f, _ := strconv.ParseFloat(sc.Text(), 64)
+	return f
+}
+
+func nextString() string {
+	sc.Scan()
+	return sc.Text()
+}
+
 func PrintInt(x int) {
 	defer out.Flush()
 	fmt.Fprintln(out, x)
+}
+
+func PrintFloat64(x float64) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintString(x string) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintHorizonaly(x []int) {
+	defer out.Flush()
+	fmt.Fprintf(out, "%d", x[0])
+	for i := 1; i < len(x); i++ {
+		fmt.Fprintf(out, " %d", x[i])
+	}
+	fmt.Fprintln(out)
+}
+
+func PrintVertically(x []int) {
+	defer out.Flush()
+	for _, v := range x {
+		fmt.Fprintln(out, v)
+	}
 }
 
 func Abs(x int) int {

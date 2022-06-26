@@ -10,21 +10,68 @@ import (
 	"strconv"
 )
 
+const Mod = 1000000007
+
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
-func solveHonestly(n int, a, b []int) int {
-	var ans int
-	for i := 0; i < n-1; i++ {
-		for j := i + 1; j < n; j++ {
-			if a[i]+Max(b[i], b[j]) < a[j]+Min(b[i], b[j]) {
-				ans++
-			} else {
-				break
+func solve(n int, x, y, p []int) int {
+	ng, ok := 0, 4*int(1e9)
+	computeDist := func(x1, y1, x2, y2 int) int {
+		return Abs(x2-x1) + Abs(y2-y1)
+	}
+	check := func(s int) bool {
+		e := make([][]int, n)
+		// n**2
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				if i == j {
+					continue
+				}
+				d := computeDist(x[i], y[i], x[j], y[j])
+				// i->jに行ける
+				if p[i]*s >= d {
+					e[i] = append(e[i], j)
+				}
 			}
 		}
+		bfs := func(x int) bool {
+			var q []int
+			q = append(q, x)
+			v := make([]bool, n)
+			v[x] = true
+			for len(q) > 0 {
+				p := q[0]
+				q = q[1:]
+				for _, next := range e[p] {
+					if !v[next] {
+						q = append(q, next)
+						v[next] = true
+					}
+				}
+			}
+			ok := true
+			for _, b := range v {
+				ok = ok && b
+			}
+			return ok
+		}
+		ok := false
+		for i := 0; i < n; i++ {
+			ok = ok || bfs(i)
+		}
+		//fmt.Println(uf)
+		return ok //uf.Size(0) == n
 	}
-	return ans
+	for ok-ng > 1 {
+		mid := (ok + ng) / 2
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
 }
 
 func main() {
@@ -33,10 +80,13 @@ func main() {
 	sc.Split(bufio.ScanWords)
 
 	n := nextInt()
-	a := nextIntSlice(n)
-	b := nextIntSlice(n)
-
-	ans := solveHonestly(n, a, b)
+	var x, y, p []int
+	for i := 0; i < n; i++ {
+		x = append(x, nextInt())
+		y = append(y, nextInt())
+		p = append(p, nextInt())
+	}
+	ans := solve(n, x, y, p)
 	PrintInt(ans)
 }
 
@@ -54,9 +104,46 @@ func nextIntSlice(n int) []int {
 	return s
 }
 
+func nextFloat64() float64 {
+	sc.Scan()
+	f, _ := strconv.ParseFloat(sc.Text(), 64)
+	return f
+}
+
+func nextString() string {
+	sc.Scan()
+	return sc.Text()
+}
+
 func PrintInt(x int) {
 	defer out.Flush()
 	fmt.Fprintln(out, x)
+}
+
+func PrintFloat64(x float64) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintString(x string) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintHorizonaly(x []int) {
+	defer out.Flush()
+	fmt.Fprintf(out, "%d", x[0])
+	for i := 1; i < len(x); i++ {
+		fmt.Fprintf(out, " %d", x[i])
+	}
+	fmt.Fprintln(out)
+}
+
+func PrintVertically(x []int) {
+	defer out.Flush()
+	for _, v := range x {
+		fmt.Fprintln(out, v)
+	}
 }
 
 func Abs(x int) int {

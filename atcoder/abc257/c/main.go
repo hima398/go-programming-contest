@@ -10,18 +10,52 @@ import (
 	"strconv"
 )
 
+const Mod = 1000000007
+
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
-func solveHonestly(n int, a, b []int) int {
-	var ans int
+func solve(n int, s string, w []int) int {
+	type man struct {
+		t byte
+		w int
+	}
+	var m []man
+	for i := 0; i < n; i++ {
+		m = append(m, man{s[i] - '0', w[i]})
+	}
+	//fmt.Println(m)
+	sort.Slice(m, func(i, j int) bool {
+		if m[i].w == m[j].w {
+			return m[i].t > m[j].t
+		} else {
+			return m[i].w < m[j].w
+		}
+	})
+	// idx含めてより左にいる子供の数、idx含めて右にいる大人の数
+	l, r := make([]int, n), make([]int, n+1)
+	for i := 0; i < n; i++ {
+		if m[i].t == byte(1) {
+			r[i]++
+		} else {
+			l[i]++
+		}
+	}
+	//for i := n - 1; i >= 1; i-- {
 	for i := 0; i < n-1; i++ {
-		for j := i + 1; j < n; j++ {
-			if a[i]+Max(b[i], b[j]) < a[j]+Min(b[i], b[j]) {
-				ans++
-			} else {
-				break
-			}
+		l[i+1] += l[i]
+	}
+	for i := n - 1; i >= 1; i-- {
+		r[i-1] += r[i]
+	}
+	r[n] = r[n-1]
+	//fmt.Println(l)
+	//fmt.Println(r)
+	ans := r[0]
+	for i := 0; i < n; i++ {
+		if i == n-1 || m[i].w < m[i+1].w {
+			//fmt.Println(i, l[i]+(r[0]-r[i]))
+			ans = Max(ans, l[i]+(r[i+1]))
 		}
 	}
 	return ans
@@ -33,10 +67,10 @@ func main() {
 	sc.Split(bufio.ScanWords)
 
 	n := nextInt()
-	a := nextIntSlice(n)
-	b := nextIntSlice(n)
+	s := nextString()
+	w := nextIntSlice(n)
 
-	ans := solveHonestly(n, a, b)
+	ans := solve(n, s, w)
 	PrintInt(ans)
 }
 
@@ -54,9 +88,46 @@ func nextIntSlice(n int) []int {
 	return s
 }
 
+func nextFloat64() float64 {
+	sc.Scan()
+	f, _ := strconv.ParseFloat(sc.Text(), 64)
+	return f
+}
+
+func nextString() string {
+	sc.Scan()
+	return sc.Text()
+}
+
 func PrintInt(x int) {
 	defer out.Flush()
 	fmt.Fprintln(out, x)
+}
+
+func PrintFloat64(x float64) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintString(x string) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
+
+func PrintHorizonaly(x []int) {
+	defer out.Flush()
+	fmt.Fprintf(out, "%d", x[0])
+	for i := 1; i < len(x); i++ {
+		fmt.Fprintf(out, " %d", x[i])
+	}
+	fmt.Fprintln(out)
+}
+
+func PrintVertically(x []int) {
+	defer out.Flush()
+	for _, v := range x {
+		fmt.Fprintln(out, v)
+	}
 }
 
 func Abs(x int) int {
