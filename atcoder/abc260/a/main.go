@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+const Mod = 1000000007
+
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
@@ -18,6 +20,18 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	s := nextString()
+	m := make(map[rune]int)
+	for _, r := range s {
+		m[r]++
+	}
+	for k, v := range m {
+		if v == 1 {
+			PrintString(string(k))
+			return
+		}
+	}
+	PrintInt(-1)
 }
 
 func nextInt() int {
@@ -262,4 +276,184 @@ func DivideSlice(A []int, K int) ([]int, []int, error) {
 		return nil, nil, errors.New("")
 	}
 	return A[:K+1], A[K:], nil
+}
+
+type IntQueue struct {
+	q []int
+}
+
+func NewIntQueue() *IntQueue {
+
+	return new(IntQueue)
+}
+func (this *IntQueue) Push(v int) {
+	this.q = append(this.q, v)
+}
+
+func (this *IntQueue) Pop() (int, error) {
+	if this.Size() == 0 {
+		return -1, errors.New("")
+	}
+	ret := this.q[0]
+	this.q = this.q[1:]
+	return ret, nil
+}
+
+func (this *IntQueue) Size() int {
+	return len(this.q)
+}
+
+func (this *IntQueue) PrintQueue() {
+	fmt.Println(this.q)
+}
+
+type Pos struct {
+	X int
+	Y int
+	D int
+}
+
+type Queue struct {
+	ps []Pos
+}
+
+func NewQueue() *Queue {
+	return new(Queue)
+}
+
+func (this *Queue) Push(p Pos) {
+	this.ps = append(this.ps, p)
+}
+
+func (this *Queue) Pop() *Pos {
+	if len(this.ps) == 0 {
+		return nil
+	}
+	p := this.ps[0]
+	this.ps = this.ps[1:]
+	return &p
+}
+
+func (this *Queue) Find(x, y int) bool {
+	for _, v := range this.ps {
+		if x == v.X && y == v.Y {
+			return true
+		}
+	}
+	return false
+}
+
+func (this *Queue) Size() int {
+	return len(this.ps)
+}
+
+type UnionFind struct {
+	par  []int // parent numbers
+	rank []int // height of tree
+	size []int
+}
+
+func NewUnionFind(n int) *UnionFind {
+	if n <= 0 {
+		return nil
+	}
+	u := new(UnionFind)
+	// for accessing index without minus 1
+	u.par = make([]int, n+1)
+	u.rank = make([]int, n+1)
+	u.size = make([]int, n+1)
+	for i := 0; i <= n; i++ {
+		u.par[i] = i
+		u.rank[i] = 0
+		u.size[i] = 1
+	}
+	return u
+}
+
+func (this *UnionFind) Find(x int) int {
+	if this.par[x] == x {
+		return x
+	} else {
+		// compress path
+		// ex. Find(4)
+		// 1 - 2 - 3 - 4
+		// 1 - 2
+		//  L-3
+		//  L 4
+		this.par[x] = this.Find(this.par[x])
+		return this.par[x]
+	}
+}
+
+func (this *UnionFind) Size(x int) int {
+	return this.size[this.Find(x)]
+}
+
+func (this *UnionFind) ExistSameUnion(x, y int) bool {
+	return this.Find(x) == this.Find(y)
+}
+
+func (this *UnionFind) Unite(x, y int) {
+	x = this.Find(x)
+	y = this.Find(y)
+	if x == y {
+		return
+	}
+	// rank
+	if this.rank[x] < this.rank[y] {
+		//yがrootの木にxがrootの木を結合する
+		this.par[x] = y
+		this.size[y] += this.size[x]
+	} else {
+		// this.rank[x] >= this.rank[y]
+		//xがrootの木にyがrootの木を結合する
+		this.par[y] = x
+		this.size[x] += this.size[y]
+		if this.rank[x] == this.rank[y] {
+			this.rank[x]++
+		}
+	}
+}
+
+func PrintUnionFind(u *UnionFind) {
+	// for debuging. not optimize.
+	fmt.Println(u.par)
+	fmt.Println(u.rank)
+	fmt.Println(u.size)
+}
+
+type BinaryIndexedTree struct {
+	n     int
+	nodes []int
+	eval  func(x1, x2 int) int
+}
+
+func NewBinaryIndexTree(n int, f func(x1, x2 int) int) *BinaryIndexedTree {
+	bt := new(BinaryIndexedTree)
+	// 1-indexed
+	bt.n = n + 1
+	bt.nodes = make([]int, bt.n)
+	bt.eval = f
+	return bt
+}
+
+//i(0-indexed)をvに更新する
+func (bt *BinaryIndexedTree) Update(i, v int) {
+	//bt内部では1-indexedなのでここでインクリメントする
+	i++
+	for i < bt.n {
+		bt.nodes[i] = bt.eval(bt.nodes[i], v)
+		i += i & -1
+	}
+}
+
+//i(0-indexed)の値を取得する
+func (bt *BinaryIndexedTree) Query(i int) int {
+	i++
+	res := 0
+	for i > 0 {
+		res = bt.eval(bt.nodes[i], res)
+		i -= i & -i
+	}
+	return res
 }

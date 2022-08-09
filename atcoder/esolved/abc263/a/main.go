@@ -18,6 +18,21 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	cards := nextIntSlice(5)
+	m := make(map[int]int)
+	for _, c := range cards {
+		m[c]++
+	}
+	var hasTwo, hasThree bool
+	for _, v := range m {
+		hasTwo = hasTwo || v == 2
+		hasThree = hasThree || v == 3
+	}
+	if len(m) == 2 && hasTwo && hasThree {
+		PrintString("Yes")
+	} else {
+		PrintString("No")
+	}
 }
 
 func nextInt() int {

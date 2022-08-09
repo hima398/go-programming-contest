@@ -13,11 +13,45 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solveHonestly(n int, a []int) (ans int) {
+	for i := 0; i < n-1; i++ {
+		for j := i + 1; j < n; j++ {
+			if Min(a[i], a[j]) == i && Max(a[i], a[j]) == j {
+				ans++
+			}
+		}
+	}
+	return ans
+}
+func solve(n int, a []int) (ans int) {
+	var s []int
+	for i := 0; i < n; i++ {
+		if a[i]-1 != i {
+			j := a[i] - 1
+			if Min(a[i], a[a[i]-1]) == i+1 && Max(a[i], a[j]) == j+1 {
+				ans++
+			}
+		} else {
+			s = append(s, a[i])
+		}
+	}
+	//fmt.Println(s)
+	sort.Ints(s)
+	for i := 0; i < len(s); i++ {
+		ans += i
+	}
+	return ans
+}
+
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	a := nextIntSlice(n)
+	ans := solve(n, a)
+	PrintInt(ans)
 }
 
 func nextInt() int {

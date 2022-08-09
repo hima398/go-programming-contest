@@ -18,6 +18,16 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	p := nextIntSlice(n - 1)
+	p = append([]int{0}, p...)
+	var ans int
+	i := n - 1
+	for i > 0 {
+		i = p[i] - 1
+		ans++
+	}
+	PrintInt(ans)
 }
 
 func nextInt() int {

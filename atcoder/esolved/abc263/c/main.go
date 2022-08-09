@@ -18,6 +18,25 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m := nextInt(), nextInt()
+	var ans [][]int
+	var dfs func(i int, a []int)
+	dfs = func(i int, a []int) {
+		if len(a) == n {
+			ans = append(ans, a)
+			return
+		}
+		for next := i + 1; next <= m; next++ {
+			na := make([]int, len(a))
+			copy(na, a)
+			na = append(na, next)
+			dfs(next, na)
+		}
+	}
+	//for i := 1; i <= m; i++ {
+	dfs(0, []int{})
+	//}
+	PrintVertically(ans)
 }
 
 func nextInt() int {
@@ -69,10 +88,11 @@ func PrintHorizonaly(x []int) {
 	fmt.Fprintln(out)
 }
 
-func PrintVertically(x []int) {
+func PrintVertically(x [][]int) {
 	defer out.Flush()
 	for _, v := range x {
-		fmt.Fprintln(out, v)
+		//fmt.Fprintln(out, v)
+		PrintHorizonaly(v)
 	}
 }
 

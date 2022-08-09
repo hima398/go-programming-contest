@@ -18,6 +18,15 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	d := nextIntSlice(6)
+
+	var ans float64
+	for _, di := range d {
+		ans += float64(di)
+	}
+	ans = ans * float64(n) / 6.0
+	PrintFloat64(ans)
 }
 
 func nextInt() int {

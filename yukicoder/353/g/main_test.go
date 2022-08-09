@@ -28,3 +28,11 @@ func TestCombination(t *testing.T) {
 		})
 	}
 }
+
+func TestIntQueue_Pop(t *testing.T) {
+	q := NewIntQueue()
+	v, e := q.Pop()
+	if e == nil {
+		t.Errorf("Pop() = %v, want %v, err", v, -1)
+	}
+}

@@ -13,11 +13,23 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solveHonestly(n int) float64 {
+	return 0.0
+}
+
+func solve(n int) float64 {
+	return 1.0
+}
+
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+
+	ans := solve(n)
+	PrintFloat64(ans)
 }
 
 func nextInt() int {

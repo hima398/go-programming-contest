@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/bits"
 	"os"
 	"sort"
 	"strconv"
@@ -13,11 +14,73 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solveHonestly(n, m, k int, u, v []int) (ans int) {
+	type edge struct {
+		i, next int
+	}
+	mask := 1<<n - 1
+	edges := make([][]edge, n)
+	for i := 0; i < m; i++ {
+		u[i]--
+		v[i]--
+		edges[u[i]] = append(edges[u[i]], edge{i, v[i]})
+		edges[v[i]] = append(edges[v[i]], edge{i, u[i]})
+	}
+	bfs := func(mask int) bool {
+		cnt := 0
+		visited := make([]bool, m)
+		for i := 0; i < n; i++ {
+			var q []int
+			q = append(q, 0)
+			var pair [][2]int
+			for len(q) > 0 {
+				i := q[0]
+				q = q[1:]
+				for _, next := range edges[i] {
+					if visited[next.i] {
+						continue
+					}
+					if (mask>>i&1)^(mask>>next.next&1) == 1 {
+						pair = append(pair, [2]int{i, next.next})
+						cnt++
+					}
+					q = append(q, next.next)
+					visited[next.i] = true
+				}
+			}
+		}
+		if cnt%2 == 0 {
+			fmt.Printf("%04b, %d\n", mask, cnt)
+		}
+		return cnt%2 == 0
+	}
+
+	for pat := 0; pat <= mask; pat++ {
+		if bits.OnesCount(uint(pat)) == k && bfs(pat) {
+			ans++
+		}
+	}
+	return ans
+}
+
+func solve(n, m, k int, u, v []int) (ans int) {
+
+	return ans
+}
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m, k := nextInt(), nextInt(), nextInt()
+	var u, v []int
+	for i := 0; i < m; i++ {
+		u = append(u, nextInt())
+		v = append(v, nextInt())
+	}
+	ans := solveHonestly(n, m, k, u, v)
+	//ans := solve(n, m, k, u, v)
+	PrintInt(ans)
 }
 
 func nextInt() int {

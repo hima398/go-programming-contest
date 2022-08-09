@@ -13,11 +13,45 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solve(n, l, r int, a []int) int {
+	const INF = 1 << 60
+	s := make([]int, n+1)
+	a = append([]int{}, a...)
+	s[0] = 0
+	for i := 1; i <= n; i++ {
+		s[i] = s[i-1] + a[i-1]
+	}
+	//左からx個lに置き換えた最小値
+	lMin := make([]int, n+1)
+	lMin[0] = 0
+	for i := 1; i <= n; i++ {
+		lMin[i] = l * i
+		lMin[i] = Min(lMin[i], lMin[i-1]+a[i-1])
+	}
+	//右からx個rに置き換えた最小値
+	rMin := make([]int, n+1)
+	rMin[0] = 0
+	for i := 1; i <= n; i++ {
+		rMin[i] = r * i
+		rMin[i] = Min(rMin[i], rMin[i-1]+a[n-i])
+	}
+
+	ans := s[n]
+	for i := 0; i <= n; i++ {
+		ans = Min(ans, lMin[i]+rMin[n-i])
+	}
+	return ans
+}
+
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, l, r := nextInt(), nextInt(), nextInt()
+	a := nextIntSlice(n)
+	ans := solve(n, l, r, a)
+	PrintInt(ans)
 }
 
 func nextInt() int {

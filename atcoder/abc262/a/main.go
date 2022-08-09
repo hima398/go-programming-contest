@@ -18,6 +18,17 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	y := nextInt()
+	switch y % 4 {
+	case 0:
+		PrintInt(y + 2)
+	case 1:
+		PrintInt(y + 1)
+	case 2:
+		PrintInt(y)
+	case 3:
+		PrintInt(y + 3)
+	}
 }
 
 func nextInt() int {

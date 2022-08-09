@@ -13,11 +13,44 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solve(n int, a [][]int) float64 {
+	//直前に出た目がiのとき、残りの回数の期待値
+	dp := make(map[int]float64)
+
+	//サイコロの出目
+	var diceRolls []int
+	for i := 0; i < n; i++ {
+		for j := 0; j < 6; j++ {
+			diceRolls = append(diceRolls, a[i][j])
+		}
+	}
+	diceRolls = append(diceRolls, 0)
+	sort.Ints(diceRolls)
+	m := len(diceRolls)
+	dp[diceRolls[m-1]] = 0.0
+
+	for i := m - 1; i >= 0; i-- {
+		for j := i - 1; j >= 0; j-- {
+			dp[j] += (1 + dp[i]) / 6
+		}
+	}
+
+	return dp[0]
+}
+
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var a [][]int
+	for i := 0; i < n; i++ {
+		a = append(a, nextIntSlice(6))
+	}
+	fmt.Println(a)
+	ans := solve(n, a)
+	PrintFloat64(ans)
 }
 
 func nextInt() int {

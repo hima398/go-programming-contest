@@ -18,6 +18,26 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	var edges [100][100]bool
+	n, m := nextInt(), nextInt()
+	for i := 0; i < m; i++ {
+		u, v := nextInt(), nextInt()
+		u--
+		v--
+		edges[u][v] = true
+		edges[v][u] = true
+	}
+	var ans int
+	for i := 0; i < n-2; i++ {
+		for j := i + 1; j < n-1; j++ {
+			for k := j + 1; k < n; k++ {
+				if edges[i][j] && edges[j][k] && edges[k][i] {
+					ans++
+				}
+			}
+		}
+	}
+	PrintInt(ans)
 }
 
 func nextInt() int {

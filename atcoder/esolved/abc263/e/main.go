@@ -13,11 +13,51 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+func solveHonestly(n int, a []int) int {
+	const p = 998244353
+	dp := make([]int, n+1)
+
+	for i := n - 1; i > 0; i-- {
+		var s int
+		for j := 1; j <= a[i-1]; j++ {
+			s += dp[i+j]
+		}
+		dp[i] = (Inv(a[i-1], p) * s) % p
+		dp[i] = (dp[i] + (a[i-1]+1)*Inv(a[i-1], p)) % p
+	}
+	return dp[1]
+}
+
+func solve(n int, a []int) int {
+	const p = 998244353
+	dp := make([]int, n+1)
+	s := make([]int, n+2)
+	var ia []int
+	for _, v := range a {
+		ia = append(ia, Inv(v, p))
+	}
+	for i := n - 1; i > 0; i-- {
+		//var s int
+		//for j := 1; j <= a[i-1]; j++ {
+		//	s += dp[i+j]
+		//}
+		dp[i] = (ia[i-1] * (s[i+1] - s[i+a[i-1]+1])) % p
+		dp[i] = (dp[i] + (a[i-1]+1)*ia[i-1]) % p
+		s[i] = (dp[i] + s[i+1]) % p
+	}
+	return dp[1]
+}
+
 func main() {
 	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	a := nextIntSlice(n - 1)
+	//ans := solveHonestly(n, a)
+	ans := solve(n, a)
+	PrintInt(ans)
 }
 
 func nextInt() int {

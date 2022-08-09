@@ -18,6 +18,18 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, a, b := nextInt(), nextInt(), nextInt()
+	var ans int
+	if a <= b {
+		ans = Max(n-(a-1), 0)
+	} else {
+		// a > b
+		ans = n / a
+		ans += ans * (b - 1)
+		ans = Max(ans-Max((b-1)-(n%a), 0), 0)
+	}
+	//ans = n / a
+	PrintInt(ans)
 }
 
 func nextInt() int {
