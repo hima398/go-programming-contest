@@ -31,7 +31,7 @@ func solve(n int, a [][]int) float64 {
 
 	for i := m - 1; i >= 0; i-- {
 		for j := i - 1; j >= 0; j-- {
-			dp[j] += (1 + dp[i]) / 6
+			dp[j] += dp[i] / 6
 		}
 	}
 
