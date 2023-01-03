@@ -1,0 +1,52 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+var sc = bufio.NewScanner(os.Stdin)
+var out = bufio.NewWriter(os.Stdout)
+
+func main() {
+	buf := make([]byte, 1024*1024)
+	sc.Buffer(buf, bufio.MaxScanTokenSize)
+	sc.Split(bufio.ScanWords)
+
+	n := nextInt()
+	s := nextString()
+	m := make(map[byte]struct{})
+	var t []string
+	for i := n - 1; i >= 0; i-- {
+		if _, found := m[s[i]]; found {
+			continue
+		}
+		t = append(t, string(s[i]))
+		m[s[i]] = struct{}{}
+	}
+	//fmt.Println(t)
+	for i := 0; i < len(t)/2; i++ {
+		j := len(t) - 1 - i
+		t[i], t[j] = t[j], t[i]
+	}
+	PrintString(strings.Join(t, ""))
+}
+
+func nextInt() int {
+	sc.Scan()
+	i, _ := strconv.Atoi(sc.Text())
+	return i
+}
+
+func nextString() string {
+	sc.Scan()
+	return sc.Text()
+}
+
+func PrintString(x string) {
+	defer out.Flush()
+	fmt.Fprintln(out, x)
+}
