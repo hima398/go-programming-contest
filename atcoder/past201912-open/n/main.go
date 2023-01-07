@@ -18,6 +18,53 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, w, c := nextInt(), nextInt(), nextInt()
+	var l, r, p []int
+	for i := 0; i < n; i++ {
+		l = append(l, nextInt())
+		r = append(r, nextInt())
+		p = append(p, nextInt())
+	}
+	ans := solve(n, w, c, l, r, p)
+	PrintInt(ans)
+}
+
+func solve(n, w, c int, l, r, p []int) int {
+
+}
+
+type Compress struct {
+	//重複除去済みの圧縮元
+	x []int
+}
+
+func New() *Compress {
+	return NewCompress()
+}
+
+func NewCompress() *Compress {
+	return new(Compress)
+}
+
+func (c *Compress) Init(x []int) {
+	m := make(map[int]struct{})
+	for _, v := range x {
+		m[v] = struct{}{}
+	}
+	for k := range m {
+		c.x = append(c.x, k)
+	}
+	sort.Ints(c.x)
+}
+
+func (c *Compress) GetIndex(x int) int {
+	return sort.Search(len(c.x), func(i int) bool {
+		return c.x[i] >= x
+	})
+}
+
+func (c *Compress) Size() int {
+	return len(c.x)
 }
 
 func nextInt() int {

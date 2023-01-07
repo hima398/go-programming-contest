@@ -23,7 +23,7 @@ func main() {
 func nextInt() int {
 	sc.Scan()
 	i, _ := strconv.Atoi(sc.Text())
-	return i
+	return int(i)
 }
 
 func nextIntSlice(n int) []int {

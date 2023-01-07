@@ -28,9 +28,79 @@ func main() {
 }
 
 func solveHonestly(n int, a [][]int) float64 {
+	var b []int
+	for _, ai := range a {
+		for _, aij := range ai {
+			b = append(b, aij)
+		}
+	}
+	sort.Ints(b)
 	dp := make(map[int]float64)
+	for k := len(b) - 1; k > 0; k-- {
+		for i := 0; i < n; i++ {
+			e := 0.0
+			for j := 0; j < n; j++ {
+				if a[i][j] > b[k] {
+					e += dp[a[i][j]] / 6.0
+				}
+			}
+		}
+	}
+	return dp[b[0]]
+}
 
+func solve(n int, a [][]int) float64 {
+	var b []int
+	for _, ai := range a {
+		for _, aij := range ai {
+			b = append(b, aij)
+		}
+	}
+	coordinates := NewCompress()
+	coordinates.Init(b)
+
+	m := coordinates.Size()
+	//a_ijのうちi番目に小さい目が出ている時にサイコロを振れる期待値
+	dp := make(map[int]float64)
+	max := 0
+	for i := m - 1; i >= 0; i-- {
+		dp[i] = max + 1
+	}
 	return dp[0]
+}
+
+type Compress struct {
+	//重複除去済みの圧縮元
+	x []int
+}
+
+func New() *Compress {
+	return NewCompress()
+}
+
+func NewCompress() *Compress {
+	return new(Compress)
+}
+
+func (c *Compress) Init(x []int) {
+	m := make(map[int]struct{})
+	for _, v := range x {
+		m[v] = struct{}{}
+	}
+	for k := range m {
+		c.x = append(c.x, k)
+	}
+	sort.Ints(c.x)
+}
+
+func (c *Compress) GetIndex(x int) int {
+	return sort.Search(len(c.x), func(i int) bool {
+		return c.x[i] >= x
+	})
+}
+
+func (c *Compress) Size() int {
+	return len(c.x)
 }
 
 func nextInt() int {
