@@ -19,6 +19,24 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	s := nextString()
+
+	var ans string
+	var found bool
+	for i := 0; i < n; i++ {
+		if s[i] == 'n' {
+			found = true
+			ans += string(s[i])
+		} else if s[i] == 'a' && found {
+			ans += "ya"
+			found = false
+		} else {
+			ans += string(s[i])
+			found = false
+		}
+	}
+	PrintString(ans)
 }
 
 func nextInt() int {

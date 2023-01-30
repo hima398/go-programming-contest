@@ -19,6 +19,53 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var s []string
+	for i := 0; i < n; i++ {
+		s = append(s, nextString())
+	}
+	ans := solve(n, s)
+	PrintVertically(ans)
+}
+
+func solve(n int, s []string) []int {
+	type text struct {
+		i int
+		s string
+	}
+	var ts []text
+	for i, si := range s {
+		ts = append(ts, text{i, si})
+	}
+	sort.Slice(ts, func(i, j int) bool {
+		return ts[i].s < ts[j].s
+	})
+	//for _, t := range ts {
+	//	fmt.Fprintln(out, t)
+	//}
+	ans := make([]int, n)
+	for i := 0; i < n-1; i++ {
+		//pre, next := 0, 0
+		same := 0
+		for j := 0; j < len(ts[i].s); j++ {
+			if ts[i].s[j] == ts[i+1].s[j] {
+				//ans[ts[i].i]++
+				//ans[ts[i+1].i]++
+				same++
+			} else {
+				//				fmt.Println(i, same)
+				ans[ts[i].i] = Max(ans[ts[i].i], same)
+				ans[ts[i+1].i] = Max(ans[ts[i+1].i], same)
+				break
+			}
+		}
+		if same > 0 {
+			ans[ts[i].i] = Max(ans[ts[i].i], same)
+			ans[ts[i+1].i] = Max(ans[ts[i+1].i], same)
+
+		}
+	}
+	return ans
 }
 
 func nextInt() int {

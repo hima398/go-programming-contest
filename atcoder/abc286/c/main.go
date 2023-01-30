@@ -19,6 +19,35 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, a, b := nextInt(), nextInt(), nextInt()
+	s := nextString()
+	ans := solve(n, a, b, s)
+	PrintInt(ans)
+}
+
+func solve(n, a, b int, s string) int {
+	const INF = 1 << 60
+	var t []string
+	for _, si := range s {
+		t = append(t, string(si))
+	}
+	ans := INF
+	computeCost := func(s []string) int {
+		res := 0
+		for i := 0; i < len(s)/2; i++ {
+			j := len(s) - 1 - i
+			if s[i] != s[j] {
+				res += b
+			}
+		}
+		return res
+	}
+	for i := 0; i < n; i++ {
+		cost := a*i + computeCost(t)
+		ans = Min(ans, cost)
+		t = append(t[1:], string(t[0]))
+	}
+	return ans
 }
 
 func nextInt() int {

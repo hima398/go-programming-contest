@@ -19,6 +19,46 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	s, t := nextString(), nextString()
+	ans := solve(s, t)
+	PrintVertically(ans)
+}
+
+func solve(s, t string) []string {
+	var ans []string
+	//var sdf string
+	sdl := s[len(s)-len(t):]
+	//PrintString(sdl)
+	//okl := true
+	oklSum := make([]int, len(t))
+	for i := 0; i < len(t); i++ {
+		ok := (sdl[i] == '?' || t[i] == '?' || sdl[i] == t[i])
+		if !ok {
+			oklSum[i]++
+		}
+		//okl = okl && ok
+	}
+	for i := len(t) - 1; i >= 1; i-- {
+		oklSum[i-1] += oklSum[i]
+	}
+	if oklSum[0] == 0 {
+		ans = append(ans, "Yes")
+	} else {
+		ans = append(ans, "No")
+	}
+	oklSum = append(oklSum, 0)
+	oklSum = oklSum[1:]
+	//fmt.Println(oklSum)
+	okf := true
+	for i := 0; i < len(t); i++ {
+		okf = okf && (s[i] == '?' || t[i] == '?' || s[i] == t[i])
+		if okf && oklSum[i] == 0 {
+			ans = append(ans, "Yes")
+		} else {
+			ans = append(ans, "No")
+		}
+	}
+	return ans
 }
 
 func nextInt() int {
@@ -70,7 +110,7 @@ func PrintHorizonaly(x []int) {
 	fmt.Fprintln(out)
 }
 
-func PrintVertically(x []int) {
+func PrintVertically(x []string) {
 	defer out.Flush()
 	for _, v := range x {
 		fmt.Fprintln(out, v)

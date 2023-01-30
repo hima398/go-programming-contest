@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"errors"
 	"fmt"
 	"math"
@@ -13,12 +14,166 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+type answer struct {
+	d, s int
+	err  error
+}
+
 func main() {
 	//bufサイズ以上の文字列入力が必要な場合は拡張すること
 	buf := make([]byte, 9*1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	a := nextIntSlice(n)
+	var s []string
+	for i := 0; i < n; i++ {
+		s = append(s, nextString())
+	}
+	q := nextInt()
+	var u, v []int
+	for i := 0; i < q; i++ {
+		u = append(u, nextInt()-1)
+		v = append(v, nextInt()-1)
+	}
+	ans := solve(n, a, s, q, u, v)
+	PrintVertically(ans)
+}
+
+func solve(n int, a []int, s []string, q int, u, v []int) []answer {
+	const INF = 1 << 60
+	e := make([][]Edge, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if s[i][j] == 'Y' {
+				e[i] = append(e[i], Edge{j, 1, 0})
+			}
+		}
+	}
+	dist := make([][]int, n)
+	for i := range dist {
+		dist[i] = make([]int, n)
+		for j := range dist[i] {
+			//if i == j {
+			//	continue
+			//}
+			dist[i][j] = INF
+		}
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if s[i][j] == 'Y' {
+				dist[i][j] = 1
+			}
+		}
+	}
+
+	souvenir := make([][]int, n)
+	for i := range souvenir {
+		souvenir[i] = make([]int, n)
+	}
+	/*
+		bfs := func(x int) {
+			var q []int
+			visited := make([]bool, n)
+			q = append(q, x)
+			visited[x] = true
+			dist[x][x] = 0
+			souvenir[x][x] = a[x]
+			for len(q) > 0 {
+				cur := q[0]
+				q = q[1:]
+				for _, next := range e[cur] {
+					if visited[next] {
+						continue
+					}
+					q = append(q, next)
+					dist[x][next] = Min(dist[x][next], dist[x][cur]+1)
+					souvenir[x][next] = Max(souvenir[x][next], souvenir[x][cur]+a[next])
+					visited[next] = true
+				}
+			}
+		}
+	*/
+	dijkstra := func(x int) ([]int, []int) {
+		dist := make([]int, n)
+		s := make([]int, n)
+		for i := 0; i < n; i++ {
+			dist[i] = INF
+		}
+		q := &PriorityQueue{}
+		heap.Init(q)
+
+		push := func(to, cost, ss int) {
+			if dist[to] <= cost {
+				return
+			}
+			dist[to] = cost
+			s[to] = Max(s[to], ss)
+			heap.Push(q, Edge{to, cost, ss})
+		}
+		push(x, 0, a[x])
+		for q.Len() > 0 {
+			cur := heap.Pop(q).(Edge)
+			if dist[cur.t] < cur.w {
+				continue
+			}
+			for _, next := range e[cur.t] {
+				push(next.t, cur.w+next.w, cur.s+a[next.t])
+			}
+		}
+		return dist, s
+	}
+
+	for i := 0; i < n; i++ {
+		//bfs(i)
+		d, s := dijkstra(i)
+		for j := 0; j < n; j++ {
+			dist[i][j] = d[j]
+			souvenir[i][j] = s[j]
+		}
+	}
+	var ans []answer
+	for i := 0; i < q; i++ {
+		if dist[u[i]][v[i]] == INF {
+			ans = append(ans, answer{-1, -1, errors.New("Impossible")})
+		} else {
+			ans = append(ans, answer{dist[u[i]][v[i]], souvenir[u[i]][v[i]], nil})
+		}
+	}
+	return ans
+}
+
+type Edge struct {
+	t, w, s int
+}
+
+type PriorityQueue []Edge
+
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
+func (pq PriorityQueue) Less(i, j int) bool {
+	if pq[i].w == pq[j].w {
+		return pq[i].s > pq[j].s
+	}
+	return pq[i].w < pq[j].w
+}
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(item interface{}) {
+	*pq = append(*pq, item.(Edge))
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	es := *pq // EdgeのSlice
+	n := len(es)
+	item := es[n-1]
+	*pq = es[0 : n-1]
+	return item
 }
 
 func nextInt() int {
@@ -70,10 +225,14 @@ func PrintHorizonaly(x []int) {
 	fmt.Fprintln(out)
 }
 
-func PrintVertically(x []int) {
+func PrintVertically(x []answer) {
 	defer out.Flush()
 	for _, v := range x {
-		fmt.Fprintln(out, v)
+		if v.err != nil {
+			fmt.Fprintln(out, "Impossible")
+		} else {
+			fmt.Fprintln(out, v.d, v.s)
+		}
 	}
 }
 

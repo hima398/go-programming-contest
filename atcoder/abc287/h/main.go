@@ -19,6 +19,113 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m := nextInt(), nextInt()
+	var a, b []int
+	for i := 0; i < m; i++ {
+		a = append(a, nextInt()-1)
+		b = append(b, nextInt()-1)
+	}
+	q := nextInt()
+	var s, t []int
+	for i := 0; i < q; i++ {
+		s = append(s, nextInt()-1)
+		t = append(t, nextInt()-1)
+	}
+	ans := solveHonestly(n, m, a, b, q, s, t)
+	PrintVertically(ans)
+}
+
+type BitSet struct {
+	b []int
+}
+
+func (bs *BitSet) Init(n int) {
+	bs.b = make([]int, n/64)
+}
+
+func solve(n, m int, a, b []int, q int, s, t []int) []int {
+	const bitSize = 64
+	nn := n / bitSize
+	canReach := make([][]int, n)
+	cost := make(map[int]map[int]int) //make([][]int, n)
+	for i := range canReach {
+		canReach[i] = make([]int, nn)
+		idx, flag := i/bitSize, 1<<(i%bitSize)
+		canReach[i][idx] |= flag
+	}
+	for i := 0; i < m; i++ {
+		idx, flag := b[i]/bitSize, 1<<(b[i]%bitSize)
+		canReach[a[i]][idx] |= flag
+		if cost[a[i]] == nil {
+			cost[a[i]] = make(map[int]int)
+		}
+		cost[a[i]][b[i]] = Max(a[i]+1, b[i]+1)
+	}
+
+	for k := 0; k < n; k++ {
+		for i := 0; i < n; i++ {
+			for j := 0; j < nn; j++ {
+				if i == j || j == k || k == i {
+					continue
+				}
+				if !canReach[i][j] && canReach[i][k] && canReach[k][j] {
+					canReach[i][j] = true
+					if cost[i] == nil {
+						cost[i] = make(map[int]int)
+					}
+					cost[i][j] = Max(i+1, Max(j+1, k+1))
+				}
+			}
+		}
+	}
+	var ans []int
+	for i := 0; i < q; i++ {
+		if v, found := cost[s[i]][t[i]]; found {
+			ans = append(ans, v)
+		} else {
+			ans = append(ans, -1)
+		}
+	}
+	return ans
+
+}
+
+func solveHonestly(n, m int, a, b []int, q int, s, t []int) []int {
+	canReach := make([][]bool, n)
+	cost := make([][]int, n)
+	for i := range cost {
+		canReach[i] = make([]bool, n)
+		cost[i] = make([]int, n)
+		for j := range cost[i] {
+			cost[i][j] = -1
+		}
+	}
+	for i := 0; i < n; i++ {
+		canReach[i][i] = true
+		cost[i][i] = i + 1
+	}
+	for i := 0; i < m; i++ {
+		canReach[a[i]][b[i]] = true
+		cost[a[i]][b[i]] = Max(a[i]+1, b[i]+1)
+	}
+	for k := 0; k < n; k++ {
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				if i == j || j == k || k == i {
+					continue
+				}
+				if !canReach[i][j] && canReach[i][k] && canReach[k][j] {
+					canReach[i][j] = true
+					cost[i][j] = Max(i+1, Max(j+1, k+1))
+				}
+			}
+		}
+	}
+	var ans []int
+	for i := 0; i < q; i++ {
+		ans = append(ans, cost[s[i]][t[i]])
+	}
+	return ans
 }
 
 func nextInt() int {

@@ -19,6 +19,19 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, p, q, r, s := nextInt(), nextInt(), nextInt(), nextInt(), nextInt()
+	p--
+	q--
+	r--
+	s--
+	a := nextIntSlice(n)
+	d := r - p
+
+	for i := p; i <= q; i++ {
+		j := i + d
+		a[i], a[j] = a[j], a[i]
+	}
+	PrintHorizonaly(a)
 }
 
 func nextInt() int {

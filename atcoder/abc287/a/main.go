@@ -19,6 +19,19 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var f int
+	for i := 0; i < n; i++ {
+		s := nextString()
+		if s == "For" {
+			f++
+		}
+	}
+	if f >= Ceil(n, 2) {
+		PrintString("Yes")
+	} else {
+		PrintString("No")
+	}
 }
 
 func nextInt() int {

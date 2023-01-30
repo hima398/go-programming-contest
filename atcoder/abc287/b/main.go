@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -19,6 +20,25 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m := nextInt(), nextInt()
+	var s []string
+	for i := 0; i < n; i++ {
+		s = append(s, nextString())
+	}
+	var t []string
+	for i := 0; i < m; i++ {
+		t = append(t, nextString())
+	}
+	var ans int
+	for _, si := range s {
+		for _, ti := range t {
+			if strings.HasSuffix(si, ti) {
+				ans++
+				break
+			}
+		}
+	}
+	PrintInt(ans)
 }
 
 func nextInt() int {

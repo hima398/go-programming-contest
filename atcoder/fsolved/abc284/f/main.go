@@ -8,17 +8,161 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
 func main() {
-	//bufサイズ以上の文字列入力が必要な場合は拡張すること
 	buf := make([]byte, 9*1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	t := nextString()
+
+	//s, i := solveZAlgorithm(n, t)
+	s, i := solveRollingHash(n, t)
+	if i >= 0 {
+		PrintString(s)
+	}
+	PrintInt(i)
+}
+
+func solveZAlgorithm(n int, t string) (string, int) {
+	reverse := func(s string) string {
+		n := len(s)
+		t := strings.Split(s, "")
+		for i := 0; i < n/2; i++ {
+			j := n - 1 - i
+			t[i], t[j] = t[j], t[i]
+		}
+		return strings.Join(t, "")
+	}
+	//fmt.Println("n = ", n, len(t))
+	a := t[:n]
+	b := reverse(t[n:])
+
+	za := ZAlgorithm(a + b)
+	za = append(za, 0)
+
+	za2 := ZAlgorithm(b + a)
+	za2 = append(za2, 0)
+
+	for i := 0; i <= n; i++ {
+		if za[2*n-i] < i {
+			continue
+		}
+		if za2[n+i] < n-i {
+			continue
+		}
+		return t[:i] + t[n+i:], i
+	}
+	return "", -1
+}
+
+func ZAlgorithm(s string) []int {
+	n := len(s)
+	if n == 0 {
+		return []int{}
+	}
+	z := make([]int, n)
+	z[0] = n
+	i, j := 1, 0
+	for i < n {
+		for i+j < n && s[j] == s[i+j] {
+			j++
+		}
+		z[i] = j
+		if j == 0 {
+			i++
+			continue
+		}
+		k := 1
+		for i+k < n && k+z[k] < j {
+			//z[i+k] = z[k]
+			k++
+		}
+		i += k
+		j -= k
+	}
+	return z
+}
+
+func solveRollingHash(n int, t string) (string, int) {
+	const p = 2147483647
+	r := make([]string, 2*n)
+	for i := 0; i < 2*n; i++ {
+		j := 2*n - 1 - i
+		r[i] = string(t[j])
+	}
+	//fmt.Println(t)
+	//fmt.Println(strings.Join(r, ""))
+	h1 := NewRollingRollingHash()
+	h2 := NewRollingRollingHash()
+
+	h1.Init(t, p)
+	h2.Init(strings.Join(r, ""), p)
+	for i := 0; i < n; i++ {
+		hash := h1.computeHash(i, i+n)
+		rev := h2.computeExcludedHash(n-i, 2*n-i)
+		//fmt.Println("hash, rev = ", hash, rev)
+		if hash == rev {
+			return strings.Join(r[n-i:2*n-i], ""), i
+		}
+	}
+	return "", -1
+}
+
+type RollingHash struct {
+	p int
+	n int
+	s string
+	w []int
+	h []int
+}
+
+func NewRollingRollingHash() *RollingHash {
+	return new(RollingHash)
+}
+
+func (hash *RollingHash) Init(s string, p int) {
+	hash.p = p
+	hash.n = len(s)
+	hash.s = s
+	tt := make([]int, hash.n+1)
+	for i := 1; i <= hash.n; i++ {
+		tt[i] = int(hash.s[i-1]-'a') + 1
+	}
+	hash.w = make([]int, hash.n+1)
+	hash.w[0] = 1
+	for i := 1; i <= hash.n; i++ {
+		hash.w[i] = 100 * hash.w[i-1] % p
+	}
+	hash.h = make([]int, hash.n+1)
+	for i := 1; i <= hash.n; i++ {
+		hash.h[i] = (100*hash.h[i-1] + tt[i]) % p
+	}
+}
+
+func (hash *RollingHash) computeHash(l, r int) int {
+	res := hash.h[r] - (hash.h[l] * hash.w[r-l] % hash.p)
+	if res < 0 {
+		res += hash.p
+	}
+	return res
+}
+
+func (hash *RollingHash) computeExcludedHash(l, r int) int {
+	t := hash.h[hash.n] - (hash.h[r] * hash.w[hash.n-r] % hash.p)
+	//fmt.Println("t = ", t)
+	res := hash.h[l] * hash.w[hash.n-r] % hash.p
+	res = (res + t) % hash.p
+	if res < 0 {
+		res += hash.p
+	}
+	return res
 }
 
 func nextInt() int {

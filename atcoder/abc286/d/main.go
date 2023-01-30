@@ -19,6 +19,43 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, x := nextInt(), nextInt()
+	var a, b []int
+	for i := 0; i < n; i++ {
+		a = append(a, nextInt())
+		b = append(b, nextInt())
+	}
+	ans := solve(n, x, a, b)
+	PrintString(ans)
+}
+
+func solve(n, x int, a, b []int) string {
+	//var maxB int
+	//for _, bi := range b {
+	//	maxB = Max(maxB, bi)
+	//}
+	//i番目の高価まで見て、j円払えるかどうか
+	dp := make([][]bool, n+1)
+	for i := 0; i <= n; i++ {
+		dp[i] = make([]bool, x+1)
+	}
+	dp[0][0] = true
+	for i := 1; i <= n; i++ {
+		for j := 0; j <= b[i-1]; j++ {
+			for k := 0; k <= x; k++ {
+				nk := k + a[i-1]*j
+				if nk > x {
+					continue
+				}
+				dp[i][nk] = dp[i][nk] || dp[i-1][k]
+			}
+		}
+	}
+	if dp[n][x] {
+		return "Yes"
+	} else {
+		return "No"
+	}
 }
 
 func nextInt() int {

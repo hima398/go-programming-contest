@@ -5,20 +5,60 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/rand"
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
 func main() {
-	//bufサイズ以上の文字列入力が必要な場合は拡張すること
-	buf := make([]byte, 9*1024*1024)
+	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := int(1e6)
+	var s []string
+	for i := 0; i < 2*n; i++ {
+		b := 'a' + byte(rand.Intn(26))
+		s = append(s, string(b))
+	}
+	PrintInt(n)
+	PrintString(strings.Join(s, ""))
+	/*
+		n := 0
+		m := 2 * int(1e5)
+		//var u, v []int
+		var path [][2]int
+		cnt := 0
+		for i := 1; i <= m; i++ {
+			n = Max(n, i)
+			for j := i - 1; j >= 1; j-- {
+				//fmt.Println(i+1, j+1)
+				path = append(path, [2]int{j, i})
+				cnt++
+				if cnt >= m {
+					break
+				}
+			}
+			if cnt >= m {
+				break
+			}
+		}
+		sort.Slice(path, func(i, j int) bool {
+			if path[i][0] == path[j][0] {
+				return path[i][1] < path[j][1]
+			}
+			return path[i][0] < path[j][0]
+		})
+		fmt.Println(n, m)
+		for i := range path {
+			fmt.Println(path[i][0], path[i][1])
+		}
+	*/
 }
 
 func nextInt() int {

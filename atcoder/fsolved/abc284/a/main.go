@@ -14,11 +14,18 @@ var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
 func main() {
-	//bufサイズ以上の文字列入力が必要な場合は拡張すること
-	buf := make([]byte, 9*1024*1024)
+	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var s []string
+	for i := 0; i < n; i++ {
+		s = append(s, nextString())
+	}
+	for i := n - 1; i >= 0; i-- {
+		PrintString(s[i])
+	}
 }
 
 func nextInt() int {

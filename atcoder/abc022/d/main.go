@@ -19,6 +19,99 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var a [][2]int
+	for i := 0; i < n; i++ {
+		a = append(a, [2]int{nextInt(), nextInt()})
+	}
+	var b [][2]int
+	for i := 0; i < n; i++ {
+		b = append(b, [2]int{nextInt(), nextInt()})
+	}
+	//ans := solveHonestly(n, a, b)
+	ans := solveByDivideAndRule(n, a, b)
+	PrintFloat64(ans)
+}
+
+type Point struct {
+	x, y float64
+}
+
+func closestPair(ps []Point, n int) float64 {
+	if len(ps) == 1 {
+		//INF
+		return 1 << 60
+	}
+	m := len(ps) / 2
+	x := ps[m].x
+	d := math.Min(closestPair(ps[:m], m), closestPair(ps[m:], n-m))
+
+	//TODO:ここのソートはこれで良いのか要確認
+	sort.Slice(ps, func(i, j int) bool {
+		return ps[i].y < ps[j].y
+	})
+
+	var qs []Point
+	for i := 0; i < n; i++ {
+		if math.Abs(ps[i].x-x) >= d {
+			continue
+		}
+		//qsに入っている頂点を、末尾からy座標の差がd以上になるまでみていく
+		for j := 0; j < len(qs); j++ {
+			dx := ps[i].x - qs[len(qs)-j-1].x
+			dy := ps[i].y - qs[len(qs)-j-1].y
+			if dy >= d {
+				break
+			}
+			d = math.Min(d, math.Sqrt(dx*dx+dy*dy))
+		}
+		qs = append(qs, ps[i])
+	}
+	return d
+}
+
+//分割統治法によるO(NlogN)解法
+func solveByDivideAndRule(n int, a, b [][2]int) float64 {
+	var pa []Point
+	for _, v := range a {
+		pa = append(pa, Point{float64(v[0]), float64(v[1])})
+	}
+	sort.Slice(pa, func(i, j int) bool {
+		return pa[i].x < pa[j].x
+	})
+	d1 := closestPair(pa, n)
+
+	var pb []Point
+	for _, v := range b {
+		pb = append(pb, Point{float64(v[0]), float64(v[1])})
+	}
+	sort.Slice(pb, func(i, j int) bool {
+		return pb[i].x < pb[j].x
+	})
+	d2 := closestPair(pb, n)
+	return d2 / d1
+}
+
+func solveHonestly(n int, a, b [][2]int) float64 {
+	computeDist := func(x1, y1, x2, y2 int) float64 {
+		xx := float64(x2 - x1)
+		yy := float64(y2 - y1)
+		return math.Sqrt(xx*xx + yy*yy)
+	}
+	sa := 0.0
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			sa += computeDist(a[i][0], a[i][1], a[j][0], a[j][1])
+		}
+	}
+	sb := 0.0
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			sb += computeDist(b[i][0], b[i][1], b[j][0], b[j][1])
+		}
+	}
+	ans := sb / sa
+	return ans
 }
 
 func nextInt() int {

@@ -14,11 +14,103 @@ var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
 func main() {
-	//bufサイズ以上の文字列入力が必要な場合は拡張すること
-	buf := make([]byte, 9*1024*1024)
+	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	t := nextInt()
+	var n []int
+	for i := 0; i < t; i++ {
+		n = append(n, nextInt())
+	}
+	ans := solve(t, n)
+	PrintVertically(ans)
+}
+
+func solve(t int, n []int) [][]int {
+	const maxP = int(1e7)
+	e := NewSieveOfEratosthenes(maxP)
+	var ps []int
+	for i := 2; i <= maxP; i++ {
+		if e.IsPrime(i) {
+			ps = append(ps, i)
+		}
+	}
+
+	var ans [][]int
+	for i := 0; i < t; i++ {
+		found := false
+		for _, p := range ps {
+			if n[i]%(p*p) != 0 {
+				continue
+			}
+			q := n[i] / (p * p)
+			//if e.IsPrime(p) {
+			v := []int{p, q}
+			ans = append(ans, v)
+			found = true
+			break
+			//}//
+		}
+		if found {
+			continue
+		}
+		for _, q := range ps {
+			if n[i]%q != 0 {
+				continue
+			}
+			p2 := math.Sqrt(float64(n[i] / q))
+			for p := int(p2) - 100; p <= int(p2)+100; p++ {
+				if p < 2 {
+					continue
+				}
+				if p*p*q == n[i] {
+					ans = append(ans, []int{p, q})
+					break
+				}
+			}
+		}
+	}
+	//PrintInt(len(ps))
+	return ans
+}
+
+//エラトステネスの篩
+type SieveOfEratosthenes struct {
+	n          int
+	isNotPrime []bool
+}
+
+func New(n int) *SieveOfEratosthenes {
+	return NewSieveOfEratosthenes(n)
+}
+
+func NewSieveOfEratosthenes(n int) *SieveOfEratosthenes {
+	sieve := new(SieveOfEratosthenes)
+	sieve.init(n)
+	return sieve
+}
+
+func (sieve *SieveOfEratosthenes) init(n int) {
+	sieve.n = n + 1
+	sieve.isNotPrime = make([]bool, sieve.n)
+	sieve.isNotPrime[0] = true
+	sieve.isNotPrime[1] = true
+	for j := 4; j < sieve.n; j += 2 {
+		sieve.isNotPrime[j] = true
+	}
+	for i := 3; i*i < sieve.n; i += 2 {
+		if sieve.isNotPrime[i] {
+			continue
+		}
+		for j := i + i; j < sieve.n; j += i {
+			sieve.isNotPrime[j] = true
+		}
+	}
+}
+
+func (sieve *SieveOfEratosthenes) IsPrime(x int) bool {
+	return !sieve.isNotPrime[x]
 }
 
 func nextInt() int {
@@ -70,10 +162,11 @@ func PrintHorizonaly(x []int) {
 	fmt.Fprintln(out)
 }
 
-func PrintVertically(x []int) {
+func PrintVertically(x [][]int) {
 	defer out.Flush()
 	for _, v := range x {
-		fmt.Fprintln(out, v)
+		//fmt.Fprintln(out, v)
+		PrintHorizonaly(v)
 	}
 }
 

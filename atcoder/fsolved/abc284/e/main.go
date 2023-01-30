@@ -13,12 +13,50 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+var cnt int
+
 func main() {
-	//bufサイズ以上の文字列入力が必要な場合は拡張すること
-	buf := make([]byte, 9*1024*1024)
+	buf := make([]byte, 1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m := nextInt(), nextInt()
+	var u, v []int
+	for i := 0; i < m; i++ {
+		u = append(u, nextInt()-1)
+		v = append(v, nextInt()-1)
+	}
+	ans := solve(n, m, u, v)
+	PrintInt(ans)
+}
+
+func solve(n, m int, u, v []int) int {
+	e := make([][]int, n)
+	for i := 0; i < m; i++ {
+		e[u[i]] = append(e[u[i]], v[i])
+		e[v[i]] = append(e[v[i]], u[i])
+	}
+	var ans int
+	visited := make([]bool, n)
+	var dfs func(cur int)
+	dfs = func(cur int) {
+		if ans >= int(1e6) {
+			return
+		}
+		visited[cur] = true
+		ans++
+		for _, next := range e[cur] {
+			cnt++
+			if visited[next] {
+				continue
+			}
+			dfs(next)
+		}
+		visited[cur] = false
+	}
+	dfs(0)
+	//fmt.Println("cnt = ", cnt)
+	return Min(ans, int(1e6))
 }
 
 func nextInt() int {
