@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -25,7 +27,7 @@ func NewFenwickTree(n int) *FenwickTree {
 	return fen
 }
 
-//i(0-indexed)をvに更新する
+// i(0-indexed)をvに更新する
 func (fen *FenwickTree) Update(i, v int) {
 	//内部では1-indexedなのでここでインクリメントする
 	//i++
@@ -35,7 +37,7 @@ func (fen *FenwickTree) Update(i, v int) {
 	}
 }
 
-//i(0-indexed)の値を取得する
+// i(0-indexed)の値を取得する
 func (fen *FenwickTree) Query(i int) int {
 	//i++
 	res := 0
@@ -95,8 +97,70 @@ func main() {
 		l = append(l, nextInt())
 		r = append(r, nextInt())
 	}
-	ans := solveWithFenwick(n, q, c, l, r)
+	//ans := solveWithFenwick(n, q, c, l, r)
+	ans := solveWithMo(n, q, c, l, r)
 	PrintVertically(ans)
+}
+
+// solve with Mo's algorithm
+func solveWithMo(n, q int, c, l, r []int) []int {
+	d := n/Min(n, Sqrt(q+1)) + 1
+	type query struct {
+		i, l, r int
+	}
+	var qs []query
+	for i := 0; i < q; i++ {
+		qs = append(qs, query{i, l[i] - 1, r[i]})
+	}
+	sort.Slice(qs, func(i, j int) bool {
+		li, lj := qs[i].l/d, qs[j].l/d
+		if li == lj {
+			if li%2 == 0 {
+				return qs[i].r < qs[j].r
+			} else {
+				return qs[i].r > qs[j].r
+			}
+		}
+		return li < lj
+	})
+	//fmt.Println(qs)
+	colors := make([]int, n+1) //make(map[int]int)
+	var cur int
+	add := func(c int) {
+		if colors[c] == 0 {
+			cur++
+		}
+		colors[c]++
+	}
+	del := func(c int) {
+		colors[c]--
+		if colors[c] == 0 {
+			cur--
+		}
+	}
+	var curL, curR int
+	ans := make([]int, q)
+	for _, v := range qs {
+		nl, nr := v.l, v.r
+		for curR < nr {
+			add(c[curR])
+			curR++
+		}
+		for nl < curL {
+			curL--
+			add(c[curL])
+		}
+		for nr < curR {
+			curR--
+			del(c[curR])
+		}
+		for curL < nl {
+			del(c[curL])
+			curL++
+		}
+		ans[v.i] = cur
+	}
+	return ans
 }
 
 func nextInt() int {
@@ -118,4 +182,19 @@ func PrintVertically(x []int) {
 	for _, v := range x {
 		fmt.Fprintln(out, v)
 	}
+}
+
+func Min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
+}
+
+func Sqrt(x int) int {
+	x2 := int(math.Sqrt(float64(x))) - 1
+	for (x2+1)*(x2+1) <= x {
+		x2++
+	}
+	return x2
 }

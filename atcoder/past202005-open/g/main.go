@@ -10,50 +10,50 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 
 type cell struct {
-	x, y, d int
+	x, y int
 }
 
 func solve(n, tx, ty int, x, y []int) int {
-	const INF = 1 << 60
-	const mx = 200
-	dy := []int{1, 1, 1, 0, 0, -1}
-	dx := []int{1, 0, -1, 1, -1, 0}
-	h := 2*mx + 1
+	const offset = 220
+	h := 2*offset + 1
 	w := h
-	dist := make([][]int, h)
+	d := make([][]int, h)
 	v := make([][]bool, h)
 	for i := 0; i < h; i++ {
-		dist[i] = make([]int, w)
+		d[i] = make([]int, w)
 		v[i] = make([]bool, w)
 	}
-	//fmt.Println("h = ", len(f))
-
-	for k := 0; k < n; k++ {
-		v[y[k]+200][x[k]+200] = true
+	//壁を訪問済みとして登録する
+	for i := 0; i < n; i++ {
+		v[x[i]+offset][y[i]+offset] = true
 	}
+
+	dx := []int{1, 0, -1, 1, -1, 0}
+	dy := []int{1, 1, 1, 0, 0, -1}
+
 	var q []cell
-	q = append(q, cell{200, 200, 0})
-	v[200][200] = true
+	q = append(q, cell{offset, offset})
+	v[offset][offset] = true
 	for len(q) > 0 {
-		p := q[0]
+		cur := q[0]
 		q = q[1:]
 		for k := 0; k < 6; k++ {
-			ni, nj, nd := p.y+dy[k], p.x+dx[k], p.d+1
-			if ni < 0 || ni >= h || nj < 0 || nj >= w {
+			nx, ny := cur.x+dx[k], cur.y+dy[k]
+			if nx < 0 || nx >= h || ny < 0 || ny >= w {
 				continue
 			}
-			if v[ni][nj] {
+			if v[nx][ny] {
 				continue
 			}
-			dist[ni][nj] = nd
-			q = append(q, cell{ni, nj, nd})
-			v[ni][nj] = true
+			q = append(q, cell{nx, ny})
+			v[nx][ny] = true
+			d[nx][ny] = d[cur.x][cur.y] + 1
 		}
 	}
-	if !v[ty+200][tx+200] {
-		return -1
+	if v[tx+offset][ty+offset] {
+		return d[tx+offset][ty+offset]
 	} else {
-		return dist[ty+200][tx+200]
+		return -1
 	}
 }
 

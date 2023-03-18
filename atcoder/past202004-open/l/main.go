@@ -14,16 +14,33 @@ var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
 func main() {
-	buf := make([]byte, 1024*1024)
+	//bufサイズ以上の文字列入力が必要な場合は拡張すること
+	buf := make([]byte, 9*1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, k, d := nextInt(), nextInt(), nextInt()
+	a := nextIntSlice(n)
+
+	ans, err := solve(n, k, d, a)
+	if err != nil {
+		PrintInt(-1)
+	} else {
+		PrintVertically(ans)
+	}
+}
+
+func solve(n, k, d int, a []int) ([]int, error) {
+	l := k + (d-1)*(k-1)
+	if l > n {
+		return nil, errors.New("Impossible")
+	}
 }
 
 func nextInt() int {
 	sc.Scan()
 	i, _ := strconv.Atoi(sc.Text())
-	return i
+	return int(i)
 }
 
 func nextIntSlice(n int) []int {
