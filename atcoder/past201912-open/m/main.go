@@ -38,13 +38,27 @@ func solve(n, m int, a, b, c, d []int) float64 {
 		for i := 0; i < n; i++ {
 			normal = append(normal, float64(b[i])-x*float64(a[i]))
 		}
-		sort.Slice(normal, func(i, j int) bool {
-			return normal[i] > normal[j]
-		})
+		//sort.Slice(normal, func(i, j int) bool {
+		//	return normal[i] > normal[j]
+		//})
+		//fmt.Println("normal = ", normal)
+		sort.Sort(sort.Reverse(sort.Float64Slice(normal)))
+
+		var helper []float64
+		for i := 0; i < m; i++ {
+			helper = append(helper, float64(d[i])-x*float64(c[i]))
+		}
+		//sort.Slice(helper, func(i, j int) bool {
+		//	return helper[i] > helper[j]
+		//})
+		//fmt.Println("helper = ", helper)
+		sort.Sort(sort.Reverse(sort.Float64Slice(helper)))
+
 		s1 := 0.0
 		for i := 0; i < 5; i++ {
 			s1 += normal[i]
 		}
+		//fmt.Println("s1 = ", s1)
 		if s1 >= 0 {
 			return true
 		}
@@ -52,15 +66,17 @@ func solve(n, m int, a, b, c, d []int) float64 {
 		for i := 0; i < 4; i++ {
 			s2 += normal[i]
 		}
-		for i := 0; i < m; i++ {
-			if s2+(float64(d[i])-x*float64(c[i])) >= 0 {
-				return true
-			}
+		s2 += helper[0]
+		//fmt.Println("s2 = ", s2)
+		if s2 >= 0.0 {
+			return true
 		}
+
 		return false
 	}
-	for ng-ok >= 1e-6 {
+	for i := 0; i < 100; i++ {
 		mid := (ng + ok) / 2.0
+		//fmt.Println(i, ok, ng, check(mid))
 		if check(mid) {
 			ok = mid
 		} else {

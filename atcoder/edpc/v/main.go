@@ -64,6 +64,7 @@ func solve(n, m int, x, y []int) []int {
 			}
 			if i+1 < nc {
 				memo[cur] *= r[i+1]
+				memo[cur] %= m
 			}
 			dfs2(next, cur)
 		}

@@ -18,6 +18,45 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, l := nextInt(), nextInt()
+	a := nextIntSlice(n)
+
+	ans := solve(n, l, a)
+
+	PrintInt(ans)
+}
+
+func solve(n, l int, a []int) int {
+	s := make([]int, n+1)
+	for i := 1; i <= n; i++ {
+		s[i] = s[i-1] + a[i-1]
+	}
+	ok, ng := 0, l+1
+	check := func(x int) bool {
+		canCut := make([]bool, n+1)
+		canCut[0] = true
+
+		for i := 0; i < n; i++ {
+			if !canCut[i] {
+				continue
+			}
+			for j := 1; j <= n; j++ {
+				if x <= s[j]-s[i] && s[j]-s[i] <= l {
+					canCut[j] = true
+				}
+			}
+		}
+		return canCut[n]
+	}
+	for ng-ok > 1 {
+		mid := (ok + ng) / 2
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
 }
 
 func nextInt() int {
@@ -224,7 +263,7 @@ func (c *Comb) Combination(n, k int) int {
 	return ret
 }
 
-//重複組み合わせ H
+// 重複組み合わせ H
 func (c *Comb) DuplicateCombination(n, k int) int {
 	return c.Combination(n+k-1, k)
 }
