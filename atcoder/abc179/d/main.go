@@ -19,6 +19,82 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, k := nextInt(), nextInt()
+	var l, r []int
+	for i := 0; i < k; i++ {
+		l = append(l, nextInt())
+		r = append(r, nextInt())
+	}
+	ans := solve(n, k, l, r)
+
+	PrintInt(ans)
+}
+
+// O(K*N**3)
+func solveHonestly(n, k int, l, r []int) int {
+	const p = 998244353
+	dp := make([][]int, n+1)
+	for i := 0; i <= n; i++ {
+		dp[i] = make([]int, n+1)
+	}
+	dp[0][0] = 1
+	//i回目の操作
+	for i := 0; i < n; i++ {
+		//マスj(0<=j<nにいる)
+		for j := 0; j < n; j++ {
+			//区間kk
+			for kk := 0; kk < k; kk++ {
+				//区間kkのうちl<=d<=rのd移動する
+				for d := l[kk]; d <= r[kk]; d++ {
+					ni := j + d
+					if ni >= n {
+						continue
+					}
+					dp[i+1][ni] += dp[i][j]
+					dp[i+1][ni] %= p
+				}
+			}
+		}
+	}
+	var ans int
+	for i := 0; i <= n; i++ {
+		ans += dp[i][n-1]
+		ans %= p
+	}
+	return ans
+}
+
+func solve(n, k int, l, r []int) int {
+	const p = 998244353
+	dp := make([][]int, n+1)
+	for i := 0; i <= n; i++ {
+		dp[i] = make([]int, n+1)
+	}
+	dp[0][0] = 1
+	//i回目の操作
+	for i := 0; i < n; i++ {
+		//マスj(0<=j<nにいる)
+		for j := 0; j < n; j++ {
+			//区間kk
+			for kk := 0; kk < k; kk++ {
+				//区間kkのうちl<=d<=rのd移動する
+				for d := l[kk]; d <= r[kk]; d++ {
+					ni := j + d
+					if ni >= n {
+						continue
+					}
+					dp[i+1][ni] += dp[i][j]
+					dp[i+1][ni] %= p
+				}
+			}
+		}
+	}
+	var ans int
+	for i := 0; i <= n; i++ {
+		ans += dp[i][n-1]
+		ans %= p
+	}
+	return ans
 }
 
 func nextInt() int {
@@ -225,7 +301,7 @@ func (c *Comb) Combination(n, k int) int {
 	return ret
 }
 
-//重複組み合わせ H
+// 重複組み合わせ H
 func (c *Comb) DuplicateCombination(n, k int) int {
 	return c.Combination(n+k-1, k)
 }

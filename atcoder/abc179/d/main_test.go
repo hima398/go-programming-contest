@@ -4,27 +4,39 @@ import (
 	"testing"
 )
 
-func TestCombination(t *testing.T) {
+func Test_solve(t *testing.T) {
 	type args struct {
-		N int
-		K int
+		n int
+		k int
+		l []int
+		r []int
 	}
-	tests := []struct {
+	type testCase struct {
 		name string
 		args args
 		want int
-	}{
-		{"Example 1", args{11, 1}, 11},
-		{"Example 2", args{11, 11}, 1},
-		{"Example 3", args{12, 11}, 12},
-		{"Example 4", args{16, 11}, 4368},
-		{"Example 5", args{199, 11}, 366461620334848584},
+	}
+	var tests []testCase
+	tests = append(tests, testCase{"Case 1", args{5, 2, []int{1, 3}, []int{1, 4}}, 4})
+	tests = append(tests, testCase{"Case 2", args{5, 2, []int{3, 5}, []int{3, 5}}, 0})
+	tests = append(tests, testCase{"Case 3", args{5, 1, []int{1}, []int{2}}, 5})
+	tests = append(tests, testCase{"Case 4", args{60, 3, []int{5, 1, 10}, []int{8, 3, 15}}, 221823067})
+	{
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Combination(tt.args.N, tt.args.K); got != tt.want {
-				t.Errorf("Combination() = %v, want %v", got, tt.want)
+			if got := solve(tt.args.n, tt.args.k, tt.args.l, tt.args.r); got != tt.want {
+				t.Errorf("solve() = %v, want %v", got, tt.want)
 			}
 		})
 	}
+}
+
+func Benchmark_solve(b *testing.B) {
+	n := 2 * int(1e5)
+	k := 1
+	l := []int{1}
+	r := []int{n}
+	solve(n, k, l, r)
 }
