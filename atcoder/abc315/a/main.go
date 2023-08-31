@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -19,6 +20,14 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	s := nextString()
+	s = strings.ReplaceAll(s, "a", "")
+	s = strings.ReplaceAll(s, "i", "")
+	s = strings.ReplaceAll(s, "u", "")
+	s = strings.ReplaceAll(s, "e", "")
+	ans := strings.ReplaceAll(s, "o", "")
+
+	Print(ans)
 }
 
 func nextInt() int {

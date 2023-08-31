@@ -19,6 +19,41 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var c []int
+	var a [][]int
+	for i := 0; i < n; i++ {
+		c = append(c, nextInt())
+		a = append(a, nextIntSlice(c[i]))
+	}
+	x := nextInt()
+
+	m := make([][]int, 37)
+	mn := make([]int, 37)
+	for i := range mn {
+		mn[i] = math.MaxInt
+	}
+	for i := 0; i < n; i++ {
+		for j := range a[i] {
+			mn[a[i][j]] = Min(mn[a[i][j]], len(a[i]))
+		}
+	}
+	for i := 0; i < n; i++ {
+		for j := range a[i] {
+			if len(a[i]) == mn[a[i][j]] {
+				m[a[i][j]] = append(m[a[i][j]], i+1)
+			}
+		}
+	}
+	ans := m[x]
+
+	if len(ans) > 0 {
+		Print(len(ans))
+		PrintHorizonaly(ans)
+	} else {
+		Print(0)
+		Print("")
+	}
 }
 
 func nextInt() int {

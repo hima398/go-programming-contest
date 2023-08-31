@@ -19,6 +19,49 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var x, y, z []int
+	for i := 0; i < n; i++ {
+		x = append(x, nextInt())
+		y = append(y, nextInt())
+		z = append(z, nextInt())
+	}
+	ans := solve(n, x, y, z)
+	Print(ans)
+}
+
+func solve(n int, x, y, z []int) int {
+	const INF = 1 << 60
+	var s int
+	for _, zi := range z {
+		s += zi
+	}
+	//i番目の選挙区まで見て、議席をj獲得する最小の鞍替え数
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, s+1)
+		for j := range dp[i] {
+			dp[i][j] = INF
+		}
+	}
+
+	dp[0][0] = 0
+	for i := 0; i < n; i++ {
+		for j := 0; j <= s; j++ {
+			dp[i+1][j] = Min(dp[i+1][j], dp[i][j])
+			nj := j + z[i]
+			if nj > s {
+				continue
+			}
+			cost := Max(Ceil(x[i]+y[i], 2)-x[i], 0)
+			dp[i+1][nj] = Min(dp[i+1][nj], dp[i][j]+cost)
+		}
+	}
+	ans := INF
+	for j := Ceil(s, 2); j <= s; j++ {
+		ans = Min(ans, dp[n][j])
+	}
+	return ans
 }
 
 func nextInt() int {

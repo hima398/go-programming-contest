@@ -19,6 +19,51 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var f, s []int
+	for i := 0; i < n; i++ {
+		f = append(f, nextInt()-1)
+		s = append(s, nextInt())
+	}
+	ans := solve(n, f, s)
+
+	Print(ans)
+}
+
+func solve(n int, f, s []int) int {
+	m := make([][]int, n)
+	for i := 0; i < n; i++ {
+		m[f[i]] = append(m[f[i]], s[i])
+	}
+	//同じ味での満足度の最大
+	var same int
+	for i := 0; i < n; i++ {
+		if len(m[i]) >= 2 {
+			sort.Slice(m[i], func(j, k int) bool {
+				return m[i][j] > m[i][k]
+			})
+			same = Max(same, m[i][0]+m[i][1]/2)
+		}
+	}
+	//各アイスの一番美味しいものたち
+	var mxs []int
+	for i := 0; i < n; i++ {
+		if len(m[i]) > 0 {
+			mxs = append(mxs, m[i][0])
+		}
+	}
+
+	//違う味での満足度の最大
+	var diff int
+	if len(mxs) >= 2 {
+		sort.Slice(mxs, func(i, j int) bool {
+			return mxs[i] > mxs[j]
+		})
+		diff = mxs[0] + mxs[1]
+	}
+	ans := Max(same, diff)
+
+	return ans
 }
 
 func nextInt() int {

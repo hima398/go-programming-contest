@@ -19,6 +19,15 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	a, b := nextInt(), nextInt()
+
+	ans := solve(a, b)
+
+	PrintFloat64(ans)
+}
+
+func solve(a, b int) float64 {
+	h, w := float64(a), float64(b)
 }
 
 func nextInt() int {
@@ -44,11 +53,6 @@ func nextFloat64() float64 {
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
-}
-
-func Print(x any) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
 }
 
 func PrintInt(x int) {

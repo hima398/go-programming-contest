@@ -19,6 +19,73 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, q := nextInt(), nextInt()
+	a := nextIntSlice(n)
+	var t, x, y []int
+	for i := 0; i < q; i++ {
+		t = append(t, nextInt())
+		x = append(x, nextInt())
+		y = append(y, nextInt())
+	}
+	ans := solve(n, q, a, t, x, y)
+	PrintHorizonaly(ans)
+}
+
+func solve(n, q int, a, t, x, y []int) []int {
+
+}
+
+type SegmentTree struct {
+	size  int
+	nodes []int
+	f     func(x1, x2 int) int
+	inf   int
+}
+
+func NewSegmentTree(n, inf int, f func(x1, x2 int) int) (st *SegmentTree) {
+	st = new(SegmentTree)
+	st.size = 1
+	for st.size < n {
+		st.size *= 2
+	}
+	st.nodes = make([]int, 2*st.size)
+	for i := range st.nodes {
+		st.nodes[i] = inf
+	}
+	st.inf = inf
+	st.f = f
+	return st
+}
+
+func (this *SegmentTree) QueryRecursively(a, b, k, l, r int) int {
+	// [a, b)と[l, r)が交差しない
+	if a >= r || b <= l {
+		return this.inf
+	}
+
+	// [a, b)が[l, r)を完全に含んでいる
+	if a <= l && b >= r {
+		return this.nodes[k]
+	}
+
+	vl := this.QueryRecursively(a, b, 2*k, l, (l+r)/2)
+	vr := this.QueryRecursively(a, b, 2*k+1, (l+r)/2, r)
+	return this.f(vl, vr) //Max(vl, vr)
+}
+
+// [l, r)の区間の値をxorした結果を返す
+func (this *SegmentTree) Query(l, r int) int {
+	return this.QueryRecursively(l, r, 1, 0, this.size)
+}
+
+func (this *SegmentTree) Update(k, x int) {
+	k += this.size
+	this.nodes[k] = this.f(this.nodes[k], x)
+	for k > 1 {
+		k /= 2
+		this.nodes[k] = this.f(this.nodes[k*2], this.nodes[k*2+1])
+	}
+	//fmt.Println(this.nodes)
 }
 
 func nextInt() int {

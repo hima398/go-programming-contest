@@ -19,6 +19,21 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	m := nextInt()
+	d := nextIntSlice(m)
+	var s int
+	for _, di := range d {
+		s += di
+	}
+	mid := Ceil(s, 2)
+
+	for i, di := range d {
+		if mid <= di {
+			fmt.Println(i+1, mid)
+			return
+		}
+		mid -= di
+	}
 }
 
 func nextInt() int {

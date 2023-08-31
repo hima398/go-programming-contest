@@ -19,6 +19,19 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	a := nextIntSlice(n)
+
+	sort.Ints(a)
+	for i := range a {
+		if i == n-1 {
+			break
+		}
+		if a[i+1]-a[i] > 1 {
+			Print(a[i] + 1)
+			return
+		}
+	}
 }
 
 func nextInt() int {

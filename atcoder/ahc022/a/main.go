@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -13,12 +12,108 @@ import (
 var sc = bufio.NewScanner(os.Stdin)
 var out = bufio.NewWriter(os.Stdout)
 
+//	type Judge interface {
+//		send(y, x, p int)
+//		receive() int
+//	}
+type AnotherSpace interface {
+	place(p [][]int)
+	measure(i, y, x int) int
+}
+
+var anotherSpace AnotherSpace
+
+type StandardIO struct {
+}
+
+func (anotherSpace StandardIO) place(p [][]int) {
+	defer out.Flush()
+	for _, v := range p {
+		if len(v) <= 0 {
+			return
+		}
+		n := len(v)
+		fmt.Fprintf(out, "%d", v[0])
+		for i := 1; i < n; i++ {
+			fmt.Fprintf(out, " %d", v[i])
+		}
+		fmt.Fprintln(out)
+	}
+}
+
+func (anotherSpace StandardIO) measure(i, y, x int) int {
+	fmt.Fprintln(out, i, y, x)
+	out.Flush()
+
+	res := nextInt()
+	return res
+}
+
 func main() {
 	//bufサイズ以上の文字列入力が必要な場合は拡張すること
 	buf := make([]byte, 9*1024*1024)
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	l, n, s := nextInt(), nextInt(), nextInt()
+	y, x := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		y[i] = nextInt()
+		x[i] = nextInt()
+	}
+
+	var st StandardIO
+	anotherSpace = st
+
+	ans := solve01(l, n, s, y, x)
+	//solve02(l, n, s, y, x)
+
+	if ans != nil {
+		PrintVertically(ans)
+	}
+}
+
+func solve02(l, n, s int, y, x []int) {
+	ans := make([]int, n)
+	PrintHorizonaly([]int{-1, -1, -1})
+	PrintVertically(ans)
+
+}
+
+// サンプル同様、ゲートの場所に機材を置いて測定結果から推測
+func solve01(l, n, s int, y, x []int) []int {
+	//配置
+	p := make([][]int, l)
+	for i := range p {
+		p[i] = make([]int, l)
+	}
+	for i := 0; i < n; i++ {
+		p[y[i]][x[i]] = 10 * i
+		//cnt++
+	}
+	anotherSpace.place(p)
+
+	//計測
+	//n*9<=1e4
+	ans := make([]int, n)
+	for i := 0; i < n; i++ {
+		v := anotherSpace.measure(i, 0, 0)
+		if v < 0 {
+			return nil
+		}
+		mn := 1 << 60
+		for j := 0; j < n; j++ {
+			diff := computeDist(p[y[j]][x[j]], v)
+			if mn > diff {
+				mn = diff
+				ans[i] = j
+			}
+		}
+	}
+
+	//回答
+	PrintHorizonaly([]int{-1, -1, -1})
+	return ans
 }
 
 func nextInt() int {
@@ -33,22 +128,6 @@ func nextIntSlice(n int) []int {
 		s[i] = nextInt()
 	}
 	return s
-}
-
-func nextFloat64() float64 {
-	sc.Scan()
-	f, _ := strconv.ParseFloat(sc.Text(), 64)
-	return f
-}
-
-func nextString() string {
-	sc.Scan()
-	return sc.Text()
-}
-
-func Print(x any) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
 }
 
 func PrintInt(x int) {
@@ -117,6 +196,14 @@ func Sqrt(x int) int {
 		x2++
 	}
 	return x2
+}
+
+func computeDist(d1, d2 int) int {
+	return Abs(d2 - d1)
+}
+
+func computeDist2(y1, x1, y2, x2 int) int {
+	return Abs(y2-y1) + Abs(x2-x1)
 }
 
 func Gcd(x, y int) int {
@@ -260,12 +347,4 @@ func NextPermutation(x sort.Interface) bool {
 		l--
 	}
 	return true
-}
-
-func DivideSlice(A []int, K int) ([]int, []int, error) {
-
-	if len(A) < K {
-		return nil, nil, errors.New("")
-	}
-	return A[:K+1], A[K:], nil
 }

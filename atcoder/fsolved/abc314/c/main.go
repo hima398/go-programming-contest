@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -19,6 +20,43 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n, m := nextInt(), nextInt()
+	s := nextString()
+	c := nextIntSlice(n)
+	for i := range c {
+		c[i]--
+	}
+
+	ans := solve(n, m, s, c)
+
+	Print(ans)
+}
+
+func solve(n, m int, s string, c []int) string {
+	ss := strings.Split(s, "")
+
+	cm := make([][]int, m)
+	for i, ci := range c {
+		cm[ci] = append(cm[ci], i)
+	}
+	cm2 := make([][]int, m)
+	for i := range cm {
+		var t []int
+		for j := 1; j < len(cm[i]); j++ {
+			t = append(t, cm[i][j])
+		}
+		t = append(t, cm[i][0])
+		cm2[i] = t
+	}
+
+	ans := make([]string, n)
+	for i := range cm {
+		for j := range cm[i] {
+			ans[cm2[i][j]] = ss[cm[i][j]]
+		}
+	}
+
+	return strings.Join(ans, "")
 }
 
 func nextInt() int {

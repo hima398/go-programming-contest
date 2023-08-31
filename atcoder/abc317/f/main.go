@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/bits"
 	"os"
 	"sort"
 	"strconv"
@@ -19,6 +20,47 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	a := nextIntSlice(3)
+	ans := solve(n, a)
+
+	Print(ans)
+}
+
+func solve(n int, a []int) int {
+	const p = 998244353
+
+	//b桁目のbitまで見て、nより小さいかどうかを表す真理値がpat
+	//ai, aj, akで割った余りになる数
+	var dp [64][8][12][12][12]int
+
+	dp[61][0][0][0][0] = 1
+	for b := 61; b > 0; b-- {
+		for pat := 0; pat < 8; pat++ {
+			for i := 0; i < a[0]; i++ {
+				for j := 0; j < a[1]; j++ {
+					for k := 0; k < a[2]; k++ {
+						for next := 0; next < 8; next++ {
+							if bits.OnesCount(uint(next))%2 == 0 {
+								continue
+							}
+						}
+						nb := b - 1
+						hasBit(n, nb)
+
+					}
+				}
+			}
+
+		}
+
+	}
+	return dp[60][1][1][1][0][0][0]
+}
+
+// xの下位iビットが1かどうかを返す
+func hasBit(x, i int) bool {
+	return (x>>i)&1 == 1
 }
 
 func nextInt() int {

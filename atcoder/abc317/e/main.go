@@ -8,6 +8,8 @@ import (
 	"os"
 	"sort"
 	"strconv"
+
+	"github.com/liyue201/gostl/ds/queue"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -19,6 +21,81 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	h, w := nextInt(), nextInt()
+	var a []string
+	for i := 0; i < h; i++ {
+		a = append(a, nextString())
+	}
+	ans := solve(h, w, a)
+	Print(ans)
+}
+
+func solve(h, w int, a []string) int {
+	const INF = math.MaxInt
+	d := make([][]int, h)
+	for i := range d {
+		d[i] = make([]int, w)
+		for j := range d[i] {
+			d[i][j] = -1
+		}
+	}
+	m := map[byte][2]int{'>': {0, 1}, 'v': {1, 0}, '<': {0, -1}, '^': {-1, 0}}
+	type node struct {
+		i, j int
+		dir  [2]int
+	}
+	var q []node
+	var si, sj, gi, gj int
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if a[i][j] == '>' || a[i][j] == 'v' || a[i][j] == '<' || a[i][j] == '^' {
+				q = append(q, node{i, j, m[a[i][j]]})
+				d[i][j] = INF
+			} else if a[i][j] == '#' {
+				d[i][j] = INF
+			} else if a[i][j] == 'S' {
+				si, sj = i, j
+			} else if a[i][j] == 'G' {
+				gi, gj = i, j
+			}
+		}
+	}
+	for len(q) > 0 {
+		cur := q[0]
+		q = q[1:]
+		ni, nj := cur.i+cur.dir[0], cur.j+cur.dir[1]
+		if ni < 0 || ni >= h || nj < 0 || nj >= w {
+			continue
+		}
+		if a[ni][nj] != '.' {
+			continue
+		}
+		q = append(q, node{ni, nj, cur.dir})
+		d[ni][nj] = INF
+	}
+	q2 := queue.New[[2]int]()
+	q2.Push([2]int{si, sj})
+	d[si][sj] = 0
+	di := []int{-1, 0, 1, 0}
+	dj := []int{0, -1, 0, 1}
+	for !q2.Empty() {
+		cur := q2.Pop()
+		for k := 0; k < 4; k++ {
+			ni, nj := cur[0]+di[k], cur[1]+dj[k]
+			if ni < 0 || ni >= h || nj < 0 || nj >= w {
+				continue
+			}
+			if d[ni][nj] != -1 {
+				continue
+			}
+			q2.Push([2]int{ni, nj})
+			d[ni][nj] = d[cur[0]][cur[1]] + 1
+		}
+	}
+	//for _, v := range d {
+	//	fmt.Println(v)
+	//}
+	return d[gi][gj]
 }
 
 func nextInt() int {

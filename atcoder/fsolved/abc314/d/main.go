@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -19,6 +20,56 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	s := nextString()
+	q := nextInt()
+	var t, x []int
+	var c []string
+	for i := 0; i < q; i++ {
+		t = append(t, nextInt())
+		x = append(x, nextInt()-1)
+		c = append(c, nextString())
+	}
+
+	ans := solve(n, s, q, t, x, c)
+
+	Print(ans)
+}
+
+func solve(n int, s string, q int, t, x []int, c []string) string {
+	idx := -1
+	change := -1
+	for i := 0; i < q; i++ {
+		switch t[i] {
+		case 2:
+			idx = i
+			change = 0
+		case 3:
+			idx = i
+			change = 1
+		}
+	}
+	ans := strings.Split(s, "")
+	for i := 0; i < q; i++ {
+		if t[i] == 1 {
+			ans[x[i]] = c[i]
+		} else if i == idx {
+			// t[i]==2||t[i]==3
+			switch change {
+			case 0:
+				//大文字から小文字
+				for i := range ans {
+					ans[i] = strings.ToLower(ans[i])
+				}
+			case 1:
+				//小文字から大文字
+				for i := range ans {
+					ans[i] = strings.ToUpper(ans[i])
+				}
+			}
+		}
+	}
+	return strings.Join(ans, "")
 }
 
 func nextInt() int {
