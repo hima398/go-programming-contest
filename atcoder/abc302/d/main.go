@@ -2,10 +2,13 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
 	"strconv"
+
+	"github.com/liyue201/gostl/ds/stack"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -21,47 +24,40 @@ func main() {
 	a := nextIntSlice(n)
 	b := nextIntSlice(m)
 
-	ans := solve(n, m, d, a, b)
-
-	PrintInt(ans)
+	ans, err := solve(n, m, d, a, b)
+	if err != nil {
+		PrintInt(-1)
+	} else {
+		PrintInt(ans)
+	}
 }
 
-func solve(n, m, d int, a, b []int) int {
+func solve(n, m, d int, a, b []int) (int, error) {
 	sort.Ints(a)
+	sa := stack.New[int]()
+	for _, ai := range a {
+		sa.Push(ai)
+	}
 	sort.Ints(b)
-	ans := -1
-	for i := 0; i < n; i++ {
-		if a[i]-d < 0 {
-			continue
-		}
-		idx := sort.Search(m, func(j int) bool {
-			return b[j] >= a[i]-d
-		})
-		if idx == m {
-			continue
-		}
-		if b[idx] > a[i] {
-			continue
-		}
-		//fmt.Println(a[i], b[idx])
-		ans = Max(ans, a[i]+b[idx])
+	sb := stack.New[int]()
+	for _, bi := range b {
+		sb.Push(bi)
 	}
-	for i := 0; i < m; i++ {
-		if b[i]-d < 0 {
-			continue
+
+	for !sa.Empty() && !sb.Empty() {
+		x, y := sa.Pop(), sb.Pop()
+		if Abs(x-y) <= d {
+			return x + y, nil
 		}
-		idx := sort.Search(n, func(j int) bool {
-			return a[j] >= b[i]-d
-		})
-		if idx == n {
-			continue
+		if x < y {
+			sa.Push(x)
+		} else {
+			sb.Push(y)
 		}
-		if a[idx] > b[i] {
-			continue
-		}
-		ans = Max(ans, a[idx]+b[i])
+		//fmt.Println(sa, sb)
 	}
-	return ans
+
+	return -1, errors.New("Impossible")
 }
 
 func nextInt() int {
@@ -83,16 +79,9 @@ func PrintInt(x int) {
 	fmt.Fprintln(out, x)
 }
 
-func Min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-func Max(x, y int) int {
-	if x < y {
-		return y
+func Abs(x int) int {
+	if x < 0 {
+		return -x
 	}
 	return x
 }
