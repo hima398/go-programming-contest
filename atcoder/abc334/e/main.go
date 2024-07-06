@@ -2,12 +2,11 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
-	"math"
 	"os"
-	"sort"
 	"strconv"
+
+	"github.com/liyue201/gostl/ds/queue"
 )
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -30,8 +29,143 @@ func main() {
 	Print(ans)
 }
 
+func IsOutGrid(i, j, h, w int) bool {
+	return i < 0 || i >= h || j < 0 || j >= w
+}
+
+func convertToUnionFindIndex(i, j, w int) int {
+	return w*i + j
+}
+
 func solve(h, w int, s []string) int {
+	const p = 998244353
+	di := []int{-1, 0, 1, 0}
+	dj := []int{0, -1, 0, 1}
+
+	/*
+		visited := make([][]bool, h)
+		for i := range visited {
+			visited[i] = make([]bool, w)
+		}
+	*/
+	grid := make([][]int, h)
+	for i := range grid {
+		grid[i] = make([]int, w)
+	}
+	type cell struct {
+		i, j int
+	}
+	bfs := func(i, j, v int) {
+		q := queue.New[cell]()
+		q.Push(cell{i, j})
+		grid[i][j] = v
+
+		for !q.Empty() {
+			cur := q.Pop()
+			for k := 0; k < 4; k++ {
+				ni, nj := cur.i+di[k], cur.j+dj[k]
+				if IsOutGrid(ni, nj, h, w) {
+					continue
+				}
+				if s[ni][nj] == '.' {
+					continue
+				}
+				if grid[ni][nj] > 0 {
+					continue
+				}
+				q.Push(cell{ni, nj})
+				grid[ni][nj] = v
+			}
+		}
+	}
+	var connectedComponentsNumber int
 	//連結成分の数を数える
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if s[i][j] == '.' || grid[i][j] > 0 {
+				continue
+			}
+			connectedComponentsNumber++
+			bfs(i, j, connectedComponentsNumber)
+		}
+	}
+	var redCellNumber int
+	m := make(map[int]int)
+	//赤色の近傍を調べる
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if s[i][j] == '#' {
+				continue
+			}
+			redCellNumber++
+			mm := make(map[int]struct{})
+			for k := 0; k < 4; k++ {
+				ni, nj := i+di[k], j+dj[k]
+				if IsOutGrid(ni, nj, h, w) {
+					continue
+				}
+				if grid[ni][nj] == 0 {
+					continue
+				}
+				mm[grid[ni][nj]] = struct{}{}
+			}
+			k := connectedComponentsNumber - len(mm) + 1
+			m[k]++
+		}
+	}
+	//for _, v := range grid {
+	//	fmt.Println(v)
+	//}
+	//テスト出力
+	//fmt.Println(m)
+
+	var ans int
+	//期待値を計算する
+	for k, v := range m {
+		ans += ((k * v % p) * Inv(redCellNumber, p)) % p
+		ans %= p
+	}
+	return ans
+}
+
+func solve01(h, w int, s []string) int {
+	const p = 998244353
+	di := []int{-1, 0, 1, 0}
+	dj := []int{0, -1, 0, 1}
+
+	uf := NewUnionFind(h * w)
+	//連結成分の数を数える
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if s[i][j] == '.' {
+				continue
+			}
+			for k := 0; k < 4; k++ {
+				ni, nj := i+di[k], j+dj[k]
+				if IsOutGrid(ni, nj, h, w) {
+					continue
+				}
+				if s[ni][nj] == '.' {
+					continue
+				}
+				u, v := convertToUnionFindIndex(i, j, w), convertToUnionFindIndex(ni, nj, w)
+				if uf.ExistSameUnion(u, v) {
+					continue
+				}
+				uf.Unite(u, v)
+			}
+		}
+	}
+
+	var connectedComponentsNumber int
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			idx := convertToUnionFindIndex(i, j, w)
+			if idx == uf.Find(idx) {
+				connectedComponentsNumber++
+			}
+		}
+	}
 
 	//赤色の近傍を調べる
 
@@ -126,20 +260,6 @@ func nextInt() int {
 	return int(i)
 }
 
-func nextIntSlice(n int) []int {
-	s := make([]int, n)
-	for i := range s {
-		s[i] = nextInt()
-	}
-	return s
-}
-
-func nextFloat64() float64 {
-	sc.Scan()
-	f, _ := strconv.ParseFloat(sc.Text(), 64)
-	return f
-}
-
 func nextString() string {
 	sc.Scan()
 	return sc.Text()
@@ -148,97 +268,6 @@ func nextString() string {
 func Print(x any) {
 	defer out.Flush()
 	fmt.Fprintln(out, x)
-}
-
-func PrintInt(x int) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintFloat64(x float64) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintString(x string) {
-	defer out.Flush()
-	fmt.Fprintln(out, x)
-}
-
-func PrintHorizonaly(x []int) {
-	defer out.Flush()
-	fmt.Fprintf(out, "%d", x[0])
-	for i := 1; i < len(x); i++ {
-		fmt.Fprintf(out, " %d", x[i])
-	}
-	fmt.Fprintln(out)
-}
-
-func PrintVertically(x []int) {
-	defer out.Flush()
-	for _, v := range x {
-		fmt.Fprintln(out, v)
-	}
-}
-
-func Abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
-func Min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-func Max(x, y int) int {
-	if x < y {
-		return y
-	}
-	return x
-}
-
-func Floor(x, y int) int {
-	return x / y
-}
-
-func Ceil(x, y int) int {
-	return (x + y - 1) / y
-}
-
-func Sqrt(x int) int {
-	x2 := int(math.Sqrt(float64(x))) - 1
-	for (x2+1)*(x2+1) <= x {
-		x2++
-	}
-	return x2
-}
-
-func Gcd(x, y int) int {
-	if x == 0 {
-		return y
-	}
-	if y == 0 {
-		return x
-	}
-	/*
-		if x < y {
-			x, y = y, x
-		}
-	*/
-	return Gcd(y, x%y)
-}
-
-func Lcm(x, y int) int {
-	// x*yのオーバーフロー対策のため先にGcdで割る
-	// Gcd(x, y)はxの約数のため割り切れる
-	ret := x / Gcd(x, y)
-	ret *= y
-	return ret
 }
 
 func Pow(x, y, p int) int {
@@ -255,116 +284,4 @@ func Pow(x, y, p int) int {
 
 func Inv(x, p int) int {
 	return Pow(x, p-2, p)
-}
-
-func Permutation(N, K int) int {
-	v := 1
-	if 0 < K && K <= N {
-		for i := 0; i < K; i++ {
-			v *= (N - i)
-		}
-	} else if K > N {
-		v = 0
-	}
-	return v
-}
-
-func Factional(N int) int {
-	return Permutation(N, N-1)
-}
-
-func Combination(N, K int) int {
-	if K == 0 {
-		return 1
-	}
-	if K == 1 {
-		return N
-	}
-	return Combination(N, K-1) * (N + 1 - K) / K
-}
-
-type Comb struct {
-	n, p int
-	fac  []int // Factional(i) mod p
-	finv []int // 1/Factional(i) mod p
-	inv  []int // 1/i mod p
-}
-
-func NewCombination(n, p int) *Comb {
-	c := new(Comb)
-	c.n = n
-	c.p = p
-	c.fac = make([]int, n+1)
-	c.finv = make([]int, n+1)
-	c.inv = make([]int, n+1)
-
-	c.fac[0] = 1
-	c.fac[1] = 1
-	c.finv[0] = 1
-	c.finv[1] = 1
-	c.inv[1] = 1
-	for i := 2; i <= n; i++ {
-		c.fac[i] = c.fac[i-1] * i % p
-		c.inv[i] = p - c.inv[p%i]*(p/i)%p
-		c.finv[i] = c.finv[i-1] * c.inv[i] % p
-	}
-	return c
-}
-
-func (c *Comb) Factional(x int) int {
-	return c.fac[x]
-}
-
-func (c *Comb) Combination(n, k int) int {
-	if n < k {
-		return 0
-	}
-	if n < 0 || k < 0 {
-		return 0
-	}
-	ret := c.fac[n] * c.finv[k]
-	ret %= c.p
-	ret *= c.finv[n-k]
-	ret %= c.p
-	return ret
-}
-
-// 重複組み合わせ H
-func (c *Comb) DuplicateCombination(n, k int) int {
-	return c.Combination(n+k-1, k)
-}
-func (c *Comb) Inv(x int) int {
-	return c.inv[x]
-}
-
-func NextPermutation(x sort.Interface) bool {
-	n := x.Len() - 1
-	if n < 1 {
-		return false
-	}
-	j := n - 1
-	for ; !x.Less(j, j+1); j-- {
-		if j == 0 {
-			return false
-		}
-	}
-	l := n
-	for !x.Less(j, l) {
-		l--
-	}
-	x.Swap(j, l)
-	for k, l := j+1, n; k < l; {
-		x.Swap(k, l)
-		k++
-		l--
-	}
-	return true
-}
-
-func DivideSlice(A []int, K int) ([]int, []int, error) {
-
-	if len(A) < K {
-		return nil, nil, errors.New("")
-	}
-	return A[:K+1], A[K:], nil
 }

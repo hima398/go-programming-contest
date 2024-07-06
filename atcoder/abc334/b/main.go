@@ -24,22 +24,7 @@ func main() {
 func solve(a, m, l, r int) int {
 	l -= a
 	r -= a
-	nt, na := Floor(l, m), Floor(r, m)
-	if nt < 0 && na < 0 {
-		ans := Abs(nt) - Abs(na)
-		if r%m == 0 {
-			ans++
-		}
-		return ans
-	} else if 0 < nt && 0 < na {
-		ans := na - nt
-		if l%m == 0 {
-			ans++
-		}
-		return ans
-	} else {
-		return na + Abs(nt) + 1
-	}
+	return Floor(r, m) - Floor(l-1, m)
 }
 
 func nextInt() int {
@@ -61,5 +46,6 @@ func Abs(x int) int {
 }
 
 func Floor(x, y int) int {
-	return x / y
+	r := (x%y + y) % y
+	return (x - r) / y
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -19,6 +20,7 @@ func main() {
 	n, a, b := nextInt(), nextInt(), nextInt()
 	d := nextIntSlice(n)
 
+	//ok := solveHonestly(n, a, b, d)
 	ok := solve(n, a, b, d)
 
 	if ok {
@@ -28,15 +30,43 @@ func main() {
 	}
 }
 
+// O((a+b)n)~int(1e14)なので時間切れ
+func solveHonestly(n, a, b int, d []int) bool {
+	for i := 0; i < a+b; i++ {
+		ok := true
+		for _, di := range d {
+			ok = ok && (di+i)%(a+b) < a
+		}
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
 func solve(n, a, b int, d []int) bool {
-	for i := range d {
-		d[i]--
-	}
-	ok := true
+	m := make(map[int]struct{})
 	for _, di := range d {
-		ok = ok && di%(a+b) < a
+		m[di%(a+b)] = struct{}{}
 	}
-	return ok
+	var e []int
+	for k := range m {
+		e = append(e, k)
+	}
+	sort.Ints(e)
+
+	nn := len(e)
+	for i := 0; i < nn; i++ {
+		e = append(e, e[i]+a+b)
+	}
+
+	for i := 0; i < nn; i++ {
+		l, r := e[i], e[i+nn-1]
+		if r-l+1 <= a {
+			return true
+		}
+	}
+	return false
 }
 
 func nextInt() int {

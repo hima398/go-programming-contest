@@ -18,24 +18,17 @@ func main() {
 	s := nextString()
 	t := nextString()
 
-	d1 := (int(s[0]-'A') - int(s[1]-'A') + 5) % 5
-	d2 := (int(t[0]-'A') - int(t[1]-'A') + 5) % 5
-	//fmt.Println(d1, d2)
-	switch d1 {
-	case 1:
-	case 4:
-		if d2 == 1 || d2 == 4 {
-			Print("Yes")
-			return
+	near := func(x, y byte) bool {
+		if x > y {
+			x, y = y, x
 		}
-	case 2:
-	case 3:
-		if d2 == 2 || d2 == 3 {
-			Print("Yes")
-			return
-		}
+		return y-x == 1 || y-x == 4
 	}
-	Print("No")
+	if near(s[0], s[1]) == near(t[0], t[1]) {
+		Print("Yes")
+	} else {
+		Print("No")
+	}
 }
 
 func nextString() string {
