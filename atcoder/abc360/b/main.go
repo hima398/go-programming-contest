@@ -17,7 +17,7 @@ func main() {
 	sc.Split(bufio.ScanWords)
 
 	s, t := nextString(), nextString()
-	for i := 2; i <= len(s); i++ {
+	for i := 1; i < len(s); i++ {
 		var u []string
 		for j := 0; j < len(s); j += i {
 			u = append(u, s[j:Min(j+i, len(s))])

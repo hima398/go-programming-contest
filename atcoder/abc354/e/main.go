@@ -19,6 +19,57 @@ func main() {
 	sc.Buffer(buf, bufio.MaxScanTokenSize)
 	sc.Split(bufio.ScanWords)
 
+	n := nextInt()
+	var a, b []int
+	for i := 0; i < n; i++ {
+		a = append(a, nextInt())
+		b = append(b, nextInt())
+	}
+
+	win := solve(n, a, b)
+
+	if win {
+		Print("Takahashi")
+	} else {
+		Print("Aoki")
+	}
+}
+
+func solve(n int, a, b []int) bool {
+	//取り除かれたカードを表す集合patのとき先手必勝かどうかを返す
+	memo := make(map[int]bool)
+	memo[1<<n-1] = false
+	var dfs func(pat int) bool
+	dfs = func(pat int) bool {
+		if win, found := memo[pat]; found {
+			return win
+		}
+		var win bool
+		for i := 0; i < n; i++ {
+			//i番目のカードが除外済み
+			if (pat>>i)&1 > 0 {
+				continue
+			}
+			for j := i + 1; j < n; j++ {
+				//j番目のカードが除外済み
+				if (pat>>j)&1 > 0 {
+					continue
+				}
+				if a[i] == a[j] || a[i] == b[j] || b[i] == a[j] || b[i] == b[j] {
+					next := pat | (1 << i) | (1 << j)
+					win = win || !dfs(next)
+				}
+			}
+		}
+		memo[pat] = win
+		return memo[pat]
+	}
+
+	win := dfs(0)
+	for k, v := range memo {
+		fmt.Printf("%018b, %v\n", k, v)
+	}
+	return win
 }
 
 func nextInt() int {

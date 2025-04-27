@@ -2,3 +2,5 @@ github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
 github.com/psampaz/gods v1.12.0 h1:JAMG9uIVsbSNR5r71skLw1w7dziOyHPRdyO/o0GMgRs=
 github.com/psampaz/gods v1.12.0/go.mod h1:d9CtHR1khiXncPVY9w+zQJtoKgbn5QHVDOsmtpuK5bI=
+golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 h1:e66Fs6Z+fZTbFBAxKfP3PALWBtpfqks2bwGcexMxgtk=
+golang.org/x/exp v0.0.0-20240909161429-701f63a606c0/go.mod h1:2TbTHSBQa924w8M6Xs1QcRcFwyucIwBGpK1p2f1YFFY=

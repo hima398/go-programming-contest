@@ -1,0 +1,90 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	// 入力読み込みの準備
+	reader := bufio.NewReader(os.Stdin)
+	line, _ := reader.ReadString('\n')
+	tokens := strings.Fields(line)
+	N, _ := strconv.Atoi(tokens[0])
+	X, _ := strconv.Atoi(tokens[1])
+
+	U := make([]int, N)
+	D := make([]int, N)
+	total := 0
+	// H の上界は各 i で U[i]+D[i] の最小値
+	Hmax := 1 << 60
+	for i := 0; i < N; i++ {
+		line, _ = reader.ReadString('\n')
+		tokens = strings.Fields(line)
+		U[i], _ = strconv.Atoi(tokens[0])
+		D[i], _ = strconv.Atoi(tokens[1])
+		total += U[i] + D[i]
+		sum := U[i] + D[i]
+		if sum < Hmax {
+			Hmax = sum
+		}
+	}
+
+	// 二分探索で H の最大値を求める
+	lo, hi, best := 2, Hmax+1, 2
+	for lo < hi {
+		mid := (lo + hi) / 2
+		if feasible(mid, N, X, U, D) {
+			best = mid
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+
+	ans := total - N*best
+	fmt.Println(ans)
+}
+
+// feasible(H, N, X, U, D) は、H を固定したときに各 i について
+// u_i ∈ [max(1, H-D[i]), min(U[i], H-1)] の区間から選び、
+// 隣接する歯について |u_i - u_{i+1}| ≤ X を満たす選び方が存在するかどうかを判定する関数です。
+func feasible(H, N, X int, U, D []int) bool {
+	low := max(1, H-D[0])
+	high := min(U[0], H-1)
+	if low > high {
+		return false
+	}
+	for i := 1; i < N; i++ {
+		L := max(1, H-D[i])
+		R := min(U[i], H-1)
+		if L > R {
+			return false
+		}
+		// 隣接条件を考慮して前の feasible 区間 [low, high] から
+		// u_i が取り得る区間は [low-X, high+X] となる
+		low = max(L, low-X)
+		high = min(R, high+X)
+		if low > high {
+			return false
+		}
+	}
+	return true
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
